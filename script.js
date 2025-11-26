@@ -83,21 +83,27 @@ function renderPoems() {
     pageContent.appendChild(poemBody);
 
     const footer = document.createElement("footer");
+    
+    const topRow = document.createElement("div");
+    topRow.className = "footer-top";
+    
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "toggle-translation";
     toggleBtn.type = "button";
     toggleBtn.textContent = "Show translation";
-    footer.appendChild(toggleBtn);
+    topRow.appendChild(toggleBtn);
+
+    const pageCount = document.createElement("span");
+    pageCount.className = "page-count";
+    pageCount.textContent = `Page ${index + 1} of ${poems.length}`;
+    topRow.appendChild(pageCount);
+    
+    footer.appendChild(topRow);
 
     const scrollHint = document.createElement("span");
     scrollHint.className = "scroll-hint";
     scrollHint.textContent = "Scroll inside the page to read the full poem";
     footer.appendChild(scrollHint);
-
-    const pageCount = document.createElement("span");
-    pageCount.className = "page-count";
-    pageCount.textContent = `Page ${index + 1} of ${poems.length}`;
-    footer.appendChild(pageCount);
 
     page.appendChild(pageContent);
     page.appendChild(footer);

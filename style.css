@@ -223,6 +223,7 @@ header > a:hover {
   overflow-y: auto;
   padding-right: clamp(0.3rem, 1vw, 0.9rem);
   scrollbar-gutter: stable both-edges;
+  position: relative;
 }
 .page-content::-webkit-scrollbar {
   width: 6px;
@@ -342,8 +343,8 @@ header > a:hover {
 }
 .page footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.5rem;
   font-size: 0.9rem;
   color: #7a6456;
   flex-shrink: 0;
@@ -354,10 +355,15 @@ header > a:hover {
     rgba(255, 255, 255, 0)
   );
 }
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .scroll-hint {
   font-size: 0.75rem;
   color: rgba(90, 70, 60, 0.85);
-  margin-left: 0.75rem;
+  text-align: center;
   opacity: 0.85;
 }
 .toggle-translation {
@@ -548,59 +554,6 @@ header > a:hover {
   .page-content {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(58, 46, 40, 0.7) rgba(0, 0, 0, 0.2);
-    position: relative;
-    padding-right: 1.5rem;
-    /* Add subtle border on right to indicate scroll area */
-    border-right: 2px solid rgba(58, 46, 40, 0.15);
-  }
-  /* Fade gradient overlay at bottom of content area to indicate scrollable content */
-  .page.active .page-content {
-    position: relative;
-  }
-  .page.active .page-content::after {
-    content: "";
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 1.5rem;
-    height: 50px;
-    background: linear-gradient(
-      to bottom,
-      rgba(255, 253, 248, 0),
-      rgba(255, 253, 248, 0.6) 50%,
-      rgba(255, 253, 248, 0.95)
-    );
-    pointer-events: none;
-    z-index: 2;
-    margin-top: -50px;
-    display: block;
-  }
-  .page-content::-webkit-scrollbar {
-    width: 12px;
-    -webkit-appearance: none;
-  }
-  .page-content::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    margin: 6px 0;
-    /* Make track always visible */
-    -webkit-box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
-    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
-  }
-  .page-content::-webkit-scrollbar-thumb {
-    background: rgba(58, 46, 40, 0.75);
-    border-radius: 10px;
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    min-height: 50px;
-    /* Add shadow for depth */
-    -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  .page-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(58, 46, 40, 0.9);
   }
   .page-navigation {
     position: relative;
@@ -608,9 +561,9 @@ header > a:hover {
     margin-top: 1rem;
   }
   .scroll-hint {
-    display: inline-block;
     font-size: 0.7rem;
     color: rgba(90, 70, 60, 0.95);
+    text-align: center;
   }
 }
 
