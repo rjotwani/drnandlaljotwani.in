@@ -1,3 +1,13 @@
+// Constants
+const SCROLL_THRESHOLD = 10;
+const SWIPE_THRESHOLD = 45;
+const SWIPE_MAX_DURATION = 600;
+const LABEL_HIDE_DELAY = 300;
+const INTERSECTION_THRESHOLD = 0.7;
+const SCROLL_TRIGGER_RATIO = 0.5;
+const RESIZE_DEBOUNCE_DELAY = 150;
+const TRANSLATION_TOGGLE_UPDATE_DELAY = 100;
+
 // DOM elements
 const notebook = document.getElementById("notebook");
 const pagesContainer = document.getElementById("pages");
@@ -7,7 +17,7 @@ const nextBtn = document.getElementById("nextPage");
 // State
 let pages = [];
 let currentPage = 0;
-let poems = []; // Will be loaded from YAML files
+let poems = [];
 
 // Split text into stanzas (paragraphs separated by blank lines)
 function splitIntoStanzas(text) {
@@ -108,9 +118,6 @@ function renderPoems() {
     for (let i = 0; i < maxStanzas; i++) {
       const stanzaRow = document.createElement("div");
       stanzaRow.className = "stanza-row";
-      if (i === 0) {
-        stanzaRow.classList.add("first-stanza");
-      }
       
       // Original stanza cell
       const originalCell = document.createElement("div");
@@ -172,11 +179,6 @@ function renderPoems() {
     scrollHint.textContent = "Scroll inside the page to read the full poem";
     footer.appendChild(scrollHint);
 
-    // Add scroll shadow element for mobile
-    const scrollShadow = document.createElement("div");
-    scrollShadow.className = "scroll-shadow";
-    pageContent.appendChild(scrollShadow);
-
     page.appendChild(pageContent);
     page.appendChild(footer);
     pagesContainer.appendChild(page);
@@ -218,24 +220,20 @@ function updateScrollShadow(element) {
   if (!element) return;
   
   const { scrollTop, scrollHeight, clientHeight } = element;
-  const isAtTop = scrollTop < 10; // 10px threshold
-  const isAtBottom = scrollHeight - scrollTop - clientHeight < 10; // 10px threshold
+  const isAtTop = scrollTop < SCROLL_THRESHOLD;
+  const isAtBottom = scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
   
   // Remove all shadow classes first
-  element.classList.remove("has-more-content", "has-more-content-top", "has-more-content-bottom");
+  element.classList.remove("has-more-content-top", "has-more-content-bottom");
   
   // Add appropriate classes based on scroll position
   if (!isAtTop && !isAtBottom) {
-    // Scrolled from both top and bottom - show both shadows
     element.classList.add("has-more-content-top", "has-more-content-bottom");
   } else if (!isAtTop) {
-    // Scrolled from top but at bottom - show top shadow only
     element.classList.add("has-more-content-top");
   } else if (!isAtBottom) {
-    // At top but not at bottom - show bottom shadow only
     element.classList.add("has-more-content-bottom");
   }
-  // If both at top and bottom, no shadows needed
 }
 
 // Setup scroll listeners for all page-content elements
@@ -264,8 +262,6 @@ const stage = document.querySelector(".notebook-stage");
 let touchStartX = 0;
 let touchStartY = 0;
 let touchStartTime = 0;
-const SWIPE_THRESHOLD = 45;
-const SWIPE_MAX_DURATION = 600;
 
 stage.addEventListener(
   "touchstart",
@@ -304,14 +300,12 @@ function setupTranslationToggles() {
   document.querySelectorAll(".toggle-translation").forEach((button) => {
     button.addEventListener("click", () => {
       const page = button.closest(".page");
-      const translation = page.querySelector(".translation");
-      const visible = translation.classList.toggle("visible");
-      page.classList.toggle("translation-visible", visible);
-      button.textContent = visible ? "Hide translation" : "Show translation";
+      const isVisible = page.classList.toggle("translation-visible");
+      button.textContent = isVisible ? "Hide translation" : "Show translation";
       // Update scroll shadow after translation toggle (content height may change)
       const pageContent = page.querySelector(".page-content");
       if (pageContent) {
-        setTimeout(() => updateScrollShadow(pageContent), 100);
+        setTimeout(() => updateScrollShadow(pageContent), TRANSLATION_TOGGLE_UPDATE_DELAY);
       }
     });
   });
@@ -322,18 +316,40 @@ async function loadPoems() {
   try {
     // Load the index.json to get the list of YAML files
     const indexResponse = await fetch('poems/index.json');
+    if (!indexResponse.ok) {
+      throw new Error(`Failed to load index.json: ${indexResponse.statusText}`);
+    }
     const indexData = await indexResponse.json();
+    
+    if (!indexData.poems || !Array.isArray(indexData.poems)) {
+      throw new Error('Invalid index.json format: missing or invalid poems array');
+    }
     
     // Load and parse each YAML file
     const poemPromises = indexData.poems.map(async (filename) => {
       const yamlResponse = await fetch(`poems/${filename}`);
+      if (!yamlResponse.ok) {
+        throw new Error(`Failed to load ${filename}: ${yamlResponse.statusText}`);
+      }
       const yamlText = await yamlResponse.text();
+      
+      if (typeof jsyaml === 'undefined' || !jsyaml.load) {
+        throw new Error('js-yaml library not loaded. Please check the script tag.');
+      }
+      
       const poem = jsyaml.load(yamlText);
+      if (!poem || !poem.title || !poem.original || !poem.translation) {
+        throw new Error(`Invalid poem format in ${filename}: missing required fields`);
+      }
       return poem;
     });
     
     // Wait for all poems to load
     poems = await Promise.all(poemPromises);
+    
+    if (poems.length === 0) {
+      throw new Error('No poems loaded');
+    }
     
     // Initialize the notebook once all poems are loaded
     renderPoems();
@@ -342,7 +358,14 @@ async function loadPoems() {
     setupScrollShadows();
   } catch (error) {
     console.error('Error loading poems:', error);
-    pagesContainer.innerHTML = '<p style="padding: 2rem; text-align: center;">Error loading poems. Please check the console for details.</p>';
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    pagesContainer.innerHTML = `
+      <div style="padding: 2rem; text-align: center; color: var(--ink);">
+        <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">Error loading poems</p>
+        <p style="font-size: 0.9rem; color: #7a6456;">${errorMessage}</p>
+        <p style="font-size: 0.85rem; margin-top: 1rem; color: #7a6456;">Please check the console for details.</p>
+      </div>
+    `;
   }
 }
 
@@ -353,10 +376,6 @@ loadPoems();
 function setupNotebookReveal() {
   const target = document.querySelector(".notebook-stage");
   if (!target) return;
-
-  const LABEL_HIDE_DELAY = 300;
-  const INTERSECTION_THRESHOLD = 0.7;
-  const SCROLL_TRIGGER_RATIO = 0.5;
 
   function openNotebook() {
     if (notebook.classList.contains("open")) return;
@@ -411,6 +430,6 @@ window.addEventListener("resize", () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
     setupScrollShadows();
-  }, 150);
+  }, RESIZE_DEBOUNCE_DELAY);
 }, { passive: true });
 
