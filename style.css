@@ -66,6 +66,9 @@ header p:first-of-type {
   box-shadow: none;
   margin-bottom: 0.5rem;
 }
+header p:not(:first-of-type) {
+  max-width: min(700px, 75vw);
+}
 header p br {
   display: block;
   margin: 0.4em 0;
@@ -429,6 +432,9 @@ header > a:hover {
     border: none;
     box-shadow: none;
     margin-bottom: 0.5rem;
+  }
+  header p:not(:first-of-type) {
+    max-width: 90vw;
   }
   header p br {
     margin: 0.35em 0;
