@@ -102,7 +102,7 @@ header > a:hover {
   transform: translateY(-1px);
 }
 .notebook-stage {
-  width: min(900px, 90vw, 120vh);
+  width: min(900px, 90vw);
   aspect-ratio: 3 / 2;
   perspective: 1800px;
   position: relative;
@@ -440,12 +440,63 @@ header > a:hover {
     margin: 0.35em 0;
   }
   .notebook-stage {
-    width: min(95vw, 130vw);
+    width: min(95vw, 100vw);
     aspect-ratio: 4 / 5;
-    max-height: none;
+    max-height: 70vh;
+    min-height: 400px;
+    perspective: none;
+  }
+  .notebook {
+    transform: none !important;
+    transform-style: flat;
+  }
+  .notebook.open {
+    transform: none !important;
+  }
+  .cover.front {
+    transform: none !important;
+    display: none;
+  }
+  .cover.back {
+    display: none;
+  }
+  .spine {
+    display: none;
+  }
+  .pages {
+    perspective: none;
+    transform-style: flat;
+    inset: 0;
+  }
+  .page {
+    backface-visibility: visible !important;
+    transform-style: flat;
+    transform: none !important;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease;
+  }
+  .page.active {
+    opacity: 1 !important;
+    pointer-events: auto;
+    z-index: 10;
+  }
+  .page.flipped {
+    display: none;
   }
   .poem-body {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    margin-left: 0 !important;
+  }
+  .page-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .page-navigation {
+    position: relative;
+    inset: auto;
+    margin-top: 1rem;
   }
 }
 
