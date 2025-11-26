@@ -81,6 +81,11 @@ function renderPoems() {
     toggleBtn.textContent = "Show translation";
     footer.appendChild(toggleBtn);
 
+    const scrollHint = document.createElement("span");
+    scrollHint.className = "scroll-hint";
+    scrollHint.textContent = "Scroll inside the page to read the full poem";
+    footer.appendChild(scrollHint);
+
     const pageCount = document.createElement("span");
     pageCount.className = "page-count";
     pageCount.textContent = `Page ${index + 1} of ${poems.length}`;

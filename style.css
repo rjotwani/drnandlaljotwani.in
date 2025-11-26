@@ -318,6 +318,12 @@ header > a:hover {
     rgba(255, 255, 255, 0)
   );
 }
+.scroll-hint {
+  font-size: 0.75rem;
+  color: rgba(90, 70, 60, 0.85);
+  margin-left: 0.75rem;
+  opacity: 0.85;
+}
 .toggle-translation {
   border: none;
   background: var(--accent);
@@ -564,6 +570,11 @@ header > a:hover {
     position: relative;
     inset: auto;
     margin-top: 1rem;
+  }
+  .scroll-hint {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: rgba(90, 70, 60, 0.95);
   }
 }
 
