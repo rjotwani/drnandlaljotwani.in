@@ -190,7 +190,7 @@ header a:hover {
 }
 .original {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
-  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-size: clamp(1.15rem, 2.5vw, 1.9rem);
   line-height: 1.8;
   direction: rtl;
   text-align: right;
@@ -200,7 +200,7 @@ header a:hover {
 .translation {
   font-style: italic;
   color: #4e3a30;
-  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-size: clamp(1.15rem, 2.5vw, 1.9rem);
   line-height: 1.8;
   padding: 0;
   margin: 0;
@@ -275,6 +275,47 @@ header a:hover {
   text-align: center;
   font-size: 0.95rem;
   color: #5d4a40;
+}
+.about-page {
+  width: min(900px, 90vw);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 18px;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.about-page h2 {
+  font-family: "Playfair Display", serif;
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+.about-page p {
+  margin: 0;
+  line-height: 1.7;
+}
+.about-page a {
+  color: var(--accent-dark);
+  font-weight: 600;
+}
+.about-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  font-size: 0.95rem;
+  color: #5c473c;
+}
+.back-link {
+  align-self: flex-start;
+  text-decoration: none;
+  color: var(--accent-dark);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 @media (max-width: 700px) {
   header h1 {
