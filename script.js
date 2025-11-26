@@ -8,7 +8,30 @@ const nextBtn = document.getElementById("nextPage");
 let pages = [];
 let currentPage = 0;
 
-// Convert newlines to <br /> tags, preserving paragraph breaks
+// Split text into stanzas (paragraphs separated by blank lines)
+function splitIntoStanzas(text) {
+  if (typeof text !== 'string') return [];
+  
+  return text
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .split(/\n\s*\n+/) // Split on one or more newlines with optional whitespace (blank lines)
+    .map(stanza => stanza.trim())
+    .filter(stanza => stanza.length > 0);
+}
+
+// Format a single stanza (convert single newlines to <br />)
+function formatStanza(stanza) {
+  if (typeof stanza !== 'string') return '';
+  
+  return stanza
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .join('<br />');
+}
+
+// Convert newlines to <br /> tags, preserving paragraph breaks (for non-grid layout)
 function formatText(text) {
   if (typeof text !== 'string') return '';
   
@@ -69,15 +92,58 @@ function renderPoems() {
     const poemBody = document.createElement("div");
     poemBody.className = "poem-body";
 
+    // Split both texts into stanzas
+    const originalStanzas = splitIntoStanzas(poem.original);
+    const translationStanzas = splitIntoStanzas(poem.translation);
+    
+    // Determine the maximum number of stanzas to ensure we have matching pairs
+    const maxStanzas = Math.max(originalStanzas.length, translationStanzas.length);
+    
+    // Create a grid container for stanza pairs
+    const stanzaGrid = document.createElement("div");
+    stanzaGrid.className = "stanza-grid";
+    
+    // Create rows for each stanza pair
+    for (let i = 0; i < maxStanzas; i++) {
+      const stanzaRow = document.createElement("div");
+      stanzaRow.className = "stanza-row";
+      if (i === 0) {
+        stanzaRow.classList.add("first-stanza");
+      }
+      
+      // Original stanza cell
+      const originalCell = document.createElement("div");
+      originalCell.className = "stanza-cell original";
+      if (i < originalStanzas.length) {
+        originalCell.innerHTML = formatStanza(originalStanzas[i]);
+      } else {
+        // Add empty cell if original has fewer stanzas
+        originalCell.innerHTML = "&nbsp;";
+      }
+      stanzaRow.appendChild(originalCell);
+      
+      // Translation stanza cell
+      const translationCell = document.createElement("div");
+      translationCell.className = "stanza-cell translation";
+      if (i < translationStanzas.length) {
+        translationCell.innerHTML = formatStanza(translationStanzas[i]);
+      } else {
+        // Add empty cell if translation has fewer stanzas
+        translationCell.innerHTML = "&nbsp;";
+      }
+      stanzaRow.appendChild(translationCell);
+      
+      stanzaGrid.appendChild(stanzaRow);
+    }
+    
+    // For non-translation-visible state, show only original
     const original = document.createElement("p");
     original.className = "original";
     original.innerHTML = formatText(poem.original);
     poemBody.appendChild(original);
-
-    const translation = document.createElement("p");
-    translation.className = "translation";
-    translation.innerHTML = formatText(poem.translation);
-    poemBody.appendChild(translation);
+    
+    // Add the grid (hidden by default, shown when translation is visible)
+    poemBody.appendChild(stanzaGrid);
 
     pageContent.appendChild(header);
     pageContent.appendChild(poemBody);
