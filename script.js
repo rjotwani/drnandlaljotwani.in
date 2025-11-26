@@ -57,6 +57,14 @@ function renderPoems() {
     const h2 = document.createElement("h2");
     h2.textContent = poem.title;
     header.appendChild(h2);
+    
+    // Add translated title if available
+    if (poem.titleTranslation) {
+      const h3 = document.createElement("h3");
+      h3.className = "title-translation";
+      h3.textContent = poem.titleTranslation;
+      header.appendChild(h3);
+    }
 
     const poemBody = document.createElement("div");
     poemBody.className = "poem-body";

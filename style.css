@@ -254,6 +254,15 @@ header > a:hover {
   font-size: 1.4rem;
   letter-spacing: 0.05em;
 }
+.page header .title-translation {
+  font-family: "Spectral", serif;
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #5c473c;
+  margin: 0.4rem 0 0 0;
+  letter-spacing: 0.02em;
+}
 .poem-body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
