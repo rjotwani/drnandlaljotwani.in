@@ -186,6 +186,64 @@ function setupTranslationToggles() {
 // Initialize
 renderPoems();
 setupTranslationToggles();
-setTimeout(() => notebook.classList.add("open"), 300);
 updatePages();
+
+// Open the notebook only when it scrolls into view
+function setupNotebookReveal() {
+  const target = document.querySelector(".notebook-stage");
+  if (!target) return;
+
+  function openNotebook() {
+    if (!notebook.classList.contains("open")) {
+      notebook.classList.add("open");
+      // Hide the cover label after the flip animation has finished
+      setTimeout(() => {
+        notebook.classList.add("label-hidden");
+      }, 300);
+    }
+  }
+
+  // Also allow opening by tapping/clicking the cover/front area
+  const coverFront = document.querySelector(".cover.front");
+  if (coverFront) {
+    coverFront.addEventListener("click", () => {
+      openNotebook();
+    });
+  }
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            openNotebook();
+            obs.disconnect();
+          }
+        });
+      },
+      {
+        root: null,
+        // Open when a good portion of the notebook is in view
+        threshold: 0.7,
+      }
+    );
+    observer.observe(target);
+  } else {
+    // Fallback: open when user scrolls a bit further down to the notebook
+    const onScroll = () => {
+      const rect = target.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      // Trigger when the top of the notebook is comfortably inside the viewport
+      if (rect.top < vh * 0.5) {
+        openNotebook();
+        window.removeEventListener("scroll", onScroll);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // In case it's already in view on load
+    onScroll();
+  }
+}
+
+setupNotebookReveal();
 
