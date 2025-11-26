@@ -44,23 +44,44 @@ header {
 header h1 {
   font-family: "Playfair Display", serif;
   font-size: clamp(2.5rem, 4vw, 3.5rem);
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.5rem 0;
 }
 header p {
-  margin: 0.5rem auto 1.5rem;
-  font-size: clamp(0.9rem, 1.5vw, 1rem);
-  line-height: 1.7;
+  margin: 0 auto 1.5rem;
+  font-size: clamp(0.85rem, 1.4vw, 0.95rem);
+  line-height: 1.8;
   color: #5c473c;
-  text-align: left;
+  text-align: center;
   max-width: 100%;
-  padding: 0 1rem;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  border: 1px solid rgba(190, 140, 99, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+header p:first-of-type {
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  margin-bottom: 0.5rem;
 }
 header p br {
   display: block;
-  margin: 0.3em 0;
+  margin: 0.4em 0;
   content: "";
 }
-header a {
+header p a {
+  color: var(--accent-dark);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px dotted var(--accent);
+}
+header p a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent-dark);
+}
+header > a {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -73,7 +94,7 @@ header a {
   border: 1px dashed var(--accent);
   transition: background 200ms ease, transform 200ms ease;
 }
-header a:hover {
+header > a:hover {
   background: rgba(190, 140, 99, 0.28);
   transform: translateY(-1px);
 }
@@ -394,14 +415,23 @@ header a:hover {
   }
   header h1 {
     font-size: 2.2rem;
+    margin-bottom: 1rem;
   }
   header p {
-    font-size: 0.85rem;
-    line-height: 1.6;
-    padding: 0 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    padding: 1rem 1.2rem;
+    text-align: center;
+  }
+  header p:first-of-type {
+    padding: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+    margin-bottom: 0.5rem;
   }
   header p br {
-    margin: 0.25em 0;
+    margin: 0.35em 0;
   }
   .notebook-stage {
     width: min(95vw, 130vw);
