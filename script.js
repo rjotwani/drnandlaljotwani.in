@@ -1,8 +1,93 @@
 const notebook = document.getElementById("notebook");
-const pages = Array.from(document.querySelectorAll(".page"));
+const pagesContainer = document.getElementById("pages");
 const prevBtn = document.getElementById("prevPage");
 const nextBtn = document.getElementById("nextPage");
+let pages = [];
 let currentPage = 0;
+
+// Convert newlines to <br /> tags
+function formatText(text) {
+  if (typeof text !== 'string') return '';
+  const lines = text
+    .replace(/\r\n/g, '\n') // Normalize line endings
+    .replace(/\r/g, '\n')
+    .split('\n');
+  
+  const result = [];
+  let prevWasEmpty = false;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const isEmpty = line.trim() === '';
+    
+    if (isEmpty) {
+      // Only add one break for consecutive empty lines
+      if (!prevWasEmpty) {
+        result.push('<br />');
+      }
+      prevWasEmpty = true;
+    } else {
+      result.push(line);
+      prevWasEmpty = false;
+    }
+  }
+  
+  return result.join('<br />');
+}
+
+// Render poems into pages
+function renderPoems() {
+  pagesContainer.innerHTML = "";
+  pages = [];
+
+  poems.forEach((poem, index) => {
+    const page = document.createElement("article");
+    page.className = "page";
+    if (index === 0) page.classList.add("active");
+    page.setAttribute("data-page", index + 1);
+
+    const pageContent = document.createElement("div");
+    pageContent.className = "page-content";
+
+    const header = document.createElement("header");
+    const h2 = document.createElement("h2");
+    h2.textContent = poem.title;
+    header.appendChild(h2);
+
+    const poemBody = document.createElement("div");
+    poemBody.className = "poem-body";
+
+    const original = document.createElement("p");
+    original.className = "original";
+    original.innerHTML = formatText(poem.original);
+    poemBody.appendChild(original);
+
+    const translation = document.createElement("p");
+    translation.className = "translation";
+    translation.innerHTML = formatText(poem.translation);
+    poemBody.appendChild(translation);
+
+    pageContent.appendChild(header);
+    pageContent.appendChild(poemBody);
+
+    const footer = document.createElement("footer");
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "toggle-translation";
+    toggleBtn.type = "button";
+    toggleBtn.textContent = "Show translation";
+    footer.appendChild(toggleBtn);
+
+    const pageCount = document.createElement("span");
+    pageCount.className = "page-count";
+    pageCount.textContent = `Page ${index + 1} of ${poems.length}`;
+    footer.appendChild(pageCount);
+
+    page.appendChild(pageContent);
+    page.appendChild(footer);
+    pagesContainer.appendChild(page);
+    pages.push(page);
+  });
+}
 
 function updatePages() {
   pages.forEach((page, index) => {
@@ -77,16 +162,21 @@ stage.addEventListener(
   { passive: true }
 );
 
-document.querySelectorAll(".toggle-translation").forEach((button) => {
-  button.addEventListener("click", () => {
-    const page = button.closest(".page");
-    const translation = page.querySelector(".translation");
-    const visible = translation.classList.toggle("visible");
-    page.classList.toggle("translation-visible", visible);
-    button.textContent = visible ? "Hide translation" : "Show translation";
+function setupTranslationToggles() {
+  document.querySelectorAll(".toggle-translation").forEach((button) => {
+    button.addEventListener("click", () => {
+      const page = button.closest(".page");
+      const translation = page.querySelector(".translation");
+      const visible = translation.classList.toggle("visible");
+      page.classList.toggle("translation-visible", visible);
+      button.textContent = visible ? "Hide translation" : "Show translation";
+    });
   });
-});
+}
 
+// Initialize
+renderPoems();
+setupTranslationToggles();
 setTimeout(() => notebook.classList.add("open"), 300);
 updatePages();
 

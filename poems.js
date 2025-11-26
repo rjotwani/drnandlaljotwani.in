@@ -1,0 +1,121 @@
+// Poems data for Dr. Nandlal Jotwani's notebook
+const poems = [
+  {
+    title: "डपु अथमु",
+    original: `डपु अथमु ..
+
+मुद्दत खां मुंहिंजी दिल,
+फ़िक्रमंदु रही आहे -
+डपु अथमु मुंहिंजी मिठिड़ी ॿोली,
+ॾुख्यो साहु खणी रही आहे.
+
+डपु अथमु ..
+
+मुअन-जे-दड़े जी अज़मत, ॾाहिर जी हुकूमत,
+ससुई-पुन्हूं, उमर-मारुई जी मुहबत,
+सचल, सामी, शाह जा दिल-सां अॾी,
+सा इमारत हाणु डही रही आहे !
+
+डपु अथमु ..
+
+धार्यनि त न कयो ही कमु आहे,
+घर में ई को वेठो विभीषणु आहे,
+माली आ वाली जंहिं चमन जो -
+उन ई चमन में बाहि लॻाई आहे !
+
+डपु अथमु ..
+
+घुर्जे हिकु रहबर, पैग़म्बर अहिड़ो,
+जो स्वार्थु छॾे, कोम अॾे, अहिड़ो,
+जाॻो उथो बदल्यो, हीअ रहनुमाई
+जा महज़ नाटक करे रही आहे !!
+
+डपु अथमु ..
+
+सिंधी आहियो त बचायो सिंधी ॿोली,
+सिंधी आहियो त ॻाल्हायो सिंधी ॿोली,
+अदब जो कयो अदब, न कि साणु ठिठोली,
+लियाकत, सियासत जी मार सही रही आहे
+
+डपु अथमु ..
+
+चोॼ सां मूं पाल्या, निभाया रिश्ता,
+ॿियनि त कयो, जो कयो, सो कयो,
+मौत मुहिंजी जी फतवा ते, ऐ दोस्त,
+तो बि त पहिंजी सही कई आहे !!
+
+डपु अथमु ..
+
+अला! जहिं चमन खे असां रतु-सतु ॾिनो,
+उन जी सूंहं लाइ असां पहिंजो पाणु ॾिनो,
+मतलबी भौरनि अची कयो आ उन ते क़ब्ज़ो
+कोमल कमल कली, दाहं खणी आई आहे.
+
+डपु अथमु ..`,
+    translation: `What more can I say…
+
+For so long now, my heart
+has gone on, heavy with worry—
+what more can I say of my sweet mother-tongue,
+that everyone is wounding and wearing away.
+
+What more can I say…
+
+The greatness of Mohenjo-daro's ramparts, the reign of Raja Dahir,
+the love of Sassui–Punhun, of Umar–Marui,
+and all that flowed from the hearts of Sachal, Sami, and Shah,
+that whole proud edifice is now crumbling down!
+
+What more can I say…
+
+It is not that strangers have done this deed,
+there sits a Vibhishana in our very own house,
+the gardener, the guardian of this garden—
+it is he himself who has set the garden on fire!
+
+What more can I say…
+
+There should have been a guide, a leader near to a prophet,
+who cast aside his own gain and belonged wholly to his people,
+but the age has changed; now leadership itself
+has turned into nothing more than an empty play!
+
+What more can I say…
+
+If you call yourself Sindhi, then save the Sindhi tongue,
+if you call yourself Sindhi, then cherish and nurture the Sindhi tongue,
+let literature remain literature—do not turn us into a joke,
+it has long endured the blows of merit crushed and politics gone rotten.
+
+What more can I say…
+
+I grew up among the faithless, yet I kept the bond true,
+they knew what they were doing, and still did all they did,
+and when the verdict of my death was passed, O friend,
+you too have placed your own seal beneath it!
+
+What more can I say…
+
+Alas, the garden to which we gave all our seasons,
+for whose fragrance we poured out our very life,
+self-seeking bees have come and taken it over,
+and the tender lotus bud now stands scorched and withered.
+
+What more can I say…`
+  },
+  {
+    title: "Poem Title Two",
+    original: `[Sindhi script for the second poem goes here. Keep the free-flowing lines
+with intentional breaks to mimic notebook handwriting.]`,
+    translation: `Add the English translation or summary for poem two. Leave this blank
+if you want to reveal the meaning in future conversations.`
+  },
+  {
+    title: "Poem Title Three",
+    original: `[Sindhi script for the third poem goes here. Use this template to add
+verses that deserve a dedicated page and translation.]`,
+    translation: `Bring the poem's imagery into English here. Consider adding cultural or
+historical notes if it helps readers understand the metaphors.`
+  }
+];
+
