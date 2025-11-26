@@ -1,42 +1,42 @@
+// DOM elements
 const notebook = document.getElementById("notebook");
 const pagesContainer = document.getElementById("pages");
 const prevBtn = document.getElementById("prevPage");
 const nextBtn = document.getElementById("nextPage");
+
+// State
 let pages = [];
 let currentPage = 0;
 
-// Convert newlines to <br /> tags
+// Convert newlines to <br /> tags, preserving paragraph breaks
 function formatText(text) {
   if (typeof text !== 'string') return '';
-  const lines = text
-    .replace(/\r\n/g, '\n') // Normalize line endings
+  
+  return text
+    .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
-    .split('\n');
-  
-  const result = [];
-  let prevWasEmpty = false;
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const isEmpty = line.trim() === '';
-    
-    if (isEmpty) {
-      // Only add one break for consecutive empty lines (paragraph break)
-      if (!prevWasEmpty) {
-        result.push('<br />');
+    .split('\n')
+    .reduce((acc, line, index, array) => {
+      const isEmpty = line.trim() === '';
+      const prevLine = index > 0 ? array[index - 1] : null;
+      const prevWasEmpty = prevLine ? prevLine.trim() === '' : false;
+      
+      if (isEmpty) {
+        // Only add one break for consecutive empty lines (paragraph break)
+        if (!prevWasEmpty) {
+          acc.push('<br />');
+        }
+      } else {
+        // Add break before this line if there was a previous line
+        if (acc.length > 0) {
+          acc.push('<br />');
+        }
+        acc.push(line);
       }
-      prevWasEmpty = true;
-    } else {
-      // Add break before this line if there was a previous line
-      if (result.length > 0) {
-        result.push('<br />');
-      }
-      result.push(line);
-      prevWasEmpty = false;
-    }
-  }
-  
-  return result.join('');
+      
+      return acc;
+    }, [])
+    .join('');
 }
 
 // Render poems into pages
@@ -137,8 +137,7 @@ function changePage(delta) {
   }
 }
 
-const stage = document.querySelector(".notebook-stage");
-
+// Keyboard navigation
 window.addEventListener("keydown", (event) => {
   if (event.key === "ArrowRight") changePage(1);
   if (event.key === "ArrowLeft") changePage(-1);
@@ -147,9 +146,13 @@ window.addEventListener("keydown", (event) => {
 prevBtn.addEventListener("click", () => changePage(-1));
 nextBtn.addEventListener("click", () => changePage(1));
 
+// Touch swipe handling
+const stage = document.querySelector(".notebook-stage");
 let touchStartX = 0;
 let touchStartY = 0;
 let touchStartTime = 0;
+const SWIPE_THRESHOLD = 45;
+const SWIPE_MAX_DURATION = 600;
 
 stage.addEventListener(
   "touchstart",
@@ -173,14 +176,13 @@ stage.addEventListener(
     const duration = Date.now() - touchStartTime;
     touchStartTime = 0;
 
-    const horizontalSwipe =
+    const isHorizontalSwipe =
       Math.abs(deltaX) > Math.abs(deltaY) &&
-      Math.abs(deltaX) > 45 &&
-      duration < 600;
+      Math.abs(deltaX) > SWIPE_THRESHOLD &&
+      duration < SWIPE_MAX_DURATION;
 
-    if (!horizontalSwipe) return;
-    if (deltaX < 0) changePage(1);
-    else changePage(-1);
+    if (!isHorizontalSwipe) return;
+    changePage(deltaX < 0 ? 1 : -1);
   },
   { passive: true }
 );
@@ -202,29 +204,32 @@ renderPoems();
 setupTranslationToggles();
 updatePages();
 
-// Open the notebook only when it scrolls into view
+// Open the notebook when it scrolls into view or is clicked
 function setupNotebookReveal() {
   const target = document.querySelector(".notebook-stage");
   if (!target) return;
 
+  const LABEL_HIDE_DELAY = 300;
+  const INTERSECTION_THRESHOLD = 0.7;
+  const SCROLL_TRIGGER_RATIO = 0.5;
+
   function openNotebook() {
-    if (!notebook.classList.contains("open")) {
-      notebook.classList.add("open");
-      // Hide the cover label after the flip animation has finished
-      setTimeout(() => {
-        notebook.classList.add("label-hidden");
-      }, 300);
-    }
+    if (notebook.classList.contains("open")) return;
+    
+    notebook.classList.add("open");
+    // Hide the cover label after the flip animation has finished
+    setTimeout(() => {
+      notebook.classList.add("label-hidden");
+    }, LABEL_HIDE_DELAY);
   }
 
-  // Also allow opening by tapping/clicking the cover/front area
+  // Allow opening by clicking the cover
   const coverFront = document.querySelector(".cover.front");
   if (coverFront) {
-    coverFront.addEventListener("click", () => {
-      openNotebook();
-    });
+    coverFront.addEventListener("click", openNotebook);
   }
 
+  // Use IntersectionObserver if available
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver(
       (entries, obs) => {
@@ -235,27 +240,21 @@ function setupNotebookReveal() {
           }
         });
       },
-      {
-        root: null,
-        // Open when a good portion of the notebook is in view
-        threshold: 0.7,
-      }
+      { root: null, threshold: INTERSECTION_THRESHOLD }
     );
     observer.observe(target);
   } else {
-    // Fallback: open when user scrolls a bit further down to the notebook
+    // Fallback: open when user scrolls to the notebook
     const onScroll = () => {
       const rect = target.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
-      // Trigger when the top of the notebook is comfortably inside the viewport
-      if (rect.top < vh * 0.5) {
+      if (rect.top < vh * SCROLL_TRIGGER_RATIO) {
         openNotebook();
         window.removeEventListener("scroll", onScroll);
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    // In case it's already in view on load
-    onScroll();
+    onScroll(); // Check if already in view on load
   }
 }
 

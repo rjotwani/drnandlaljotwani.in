@@ -567,48 +567,8 @@ he was the joyous madman of the nation, the land’s devoted lover.`
 ऐ कली, इहो सितमु, तूं सहारीं छो थी !
 
 अला! मूं त चुम्यो तोखे, महज़ु सूपिने में 
-तूं  लॼ  विचां, भला ईँएं शर्माईं छो थी !
-
-तूं नशीली निगाहुनि सां निहा
-
-हूंअ त मां ईंएं बेखबर न थींदो आहियां - 
-तूं  नशीली निगाहुनि सां, निहारीं छो थी !
-
-तोबहि कई मां, न कॾहिं पीअंदुसु, मगर -
-तूं अख़िर्युनि जे प्यालनि मां पिआरीं छो थी !
-
-हिन खिज़ां ज़िंदगीअ में अची वेंदी बहार - 
-तूं मूं सां, के घड़ियूं गॾु, न घारीं छो थी ! 
-
-दहिशतगर्द फ़ितरत खां, मां थो पुछां - 
-मज़हब जी ग़ज़ब बाहि, तूं ॿारीं छो थी !
-
-नाहक अची तोखे लुटनि, वैहिशी भौंरा 
-ऐ कली, इहो सितमु, तूं सहारीं छो थी !
-
-अला! मूं त चुम्यो तोखे, महज़ु सूपिने में 
 तूं  लॼ  विचां, भला ईँएं शर्माईं छो थी !`,
     translation: `When you look at me with intoxicating eyes…
-
-How could I ever have remained unaware,
-when you were looking at me with those intoxicating eyes!
-
-Even though I swore I would never drink again,
-you made me drink from the goblets of your eyes.
-
-Into this autumn-stricken life, spring came and went—
-yet you did not spend even a few moments with me.
-
-I ask this terror-bent nature of ours:
-why have you brandished the dreadful wrath of religion?
-
-Without cause, savage bees come to plunder you;
-O tender bud, this cruelty you silently endure.
-
-Ah! I only kissed you in the realm of dreams,
-yet you, awake, blushed as if it truly had been so.
-
-When you look at me with intoxicating eyes…
 
 How could I ever have remained unaware,
 when you were looking at me with those intoxicating eyes!
