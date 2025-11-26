@@ -74,10 +74,10 @@ header p a:hover {
 }
 .notebook-stage {
   width: min(900px, 90vw);
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 3 / 2.3;
   perspective: 1800px;
   position: relative;
-  max-height: 80vh;
+  max-height: 90vh;
 }
 .notebook {
   width: 100%;
@@ -196,7 +196,7 @@ header p a:hover {
   scrollbar-gutter: stable both-edges;
   position: relative;
 }
-.page-content.has-more-content {
+.page-content.has-more-content-bottom {
   mask-image: linear-gradient(
     to bottom,
     black 0%,
@@ -206,6 +206,36 @@ header p a:hover {
   -webkit-mask-image: linear-gradient(
     to bottom,
     black 0%,
+    black calc(100% - 50px),
+    transparent 100%
+  );
+}
+.page-content.has-more-content-top {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 50px,
+    black 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 50px,
+    black 100%
+  );
+}
+.page-content.has-more-content-top.has-more-content-bottom {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 50px,
+    black calc(100% - 50px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 50px,
     black calc(100% - 50px),
     transparent 100%
   );
@@ -484,8 +514,8 @@ header p a:hover {
   .notebook-stage {
     width: min(95vw, 100vw);
     aspect-ratio: 4 / 5;
-    max-height: 70vh;
-    min-height: 400px;
+    max-height: 85vh;
+    min-height: 450px;
     perspective: none;
   }
   .notebook {

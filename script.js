@@ -216,27 +216,29 @@ function changePage(delta) {
 function updateScrollShadow(element) {
   if (!element) return;
   
-  const isMobile = window.matchMedia("(max-width: 700px)").matches;
-  if (!isMobile) {
-    element.classList.remove("has-more-content");
-    return;
-  }
-  
   const { scrollTop, scrollHeight, clientHeight } = element;
+  const isAtTop = scrollTop < 10; // 10px threshold
   const isAtBottom = scrollHeight - scrollTop - clientHeight < 10; // 10px threshold
   
-  if (isAtBottom) {
-    element.classList.remove("has-more-content");
-  } else {
-    element.classList.add("has-more-content");
-  }
+  // Remove all shadow classes first
+  element.classList.remove("has-more-content", "has-more-content-top", "has-more-content-bottom");
   
+  // Add appropriate classes based on scroll position
+  if (!isAtTop && !isAtBottom) {
+    // Scrolled from both top and bottom - show both shadows
+    element.classList.add("has-more-content-top", "has-more-content-bottom");
+  } else if (!isAtTop) {
+    // Scrolled from top but at bottom - show top shadow only
+    element.classList.add("has-more-content-top");
+  } else if (!isAtBottom) {
+    // At top but not at bottom - show bottom shadow only
+    element.classList.add("has-more-content-bottom");
+  }
+  // If both at top and bottom, no shadows needed
 }
 
 // Setup scroll listeners for all page-content elements
 function setupScrollShadows() {
-  const isMobile = window.matchMedia("(max-width: 700px)").matches;
-  
   document.querySelectorAll(".page-content").forEach((content) => {
     updateScrollShadow(content);
     // Add scroll listener if not already added
