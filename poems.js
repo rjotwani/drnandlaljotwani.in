@@ -334,7 +334,7 @@ but now the body no longer has that strength.
 There was so much I had wanted to do;
 the time was fixed, yet the longing remains unfinished.
 
-We called this life eternal and made our hearts glad;
+We thought this life was eternal and made our hearts glad;
 now what was written as fate stands plainly revealed.
 
 At every moment old age whispers in our ears—
@@ -515,8 +515,8 @@ the bitter lesson of those who betrayed the land;
 we will render every such move of yours
 utterly worthless.
 
-Smoke never rises on its own;
-some small spark must be smouldering somewhere.`
+Immortal martyr Hemu Kalani-
+Vande Mataram. Vande Mataram.`
   },
   {
     title: "हेमू कालाणी खे असां जो सलामु आ",
