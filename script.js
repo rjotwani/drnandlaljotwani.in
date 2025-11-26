@@ -21,18 +21,22 @@ function formatText(text) {
     const isEmpty = line.trim() === '';
     
     if (isEmpty) {
-      // Only add one break for consecutive empty lines
+      // Only add one break for consecutive empty lines (paragraph break)
       if (!prevWasEmpty) {
         result.push('<br />');
       }
       prevWasEmpty = true;
     } else {
+      // Add break before this line if there was a previous line
+      if (result.length > 0) {
+        result.push('<br />');
+      }
       result.push(line);
       prevWasEmpty = false;
     }
   }
   
-  return result.join('<br />');
+  return result.join('');
 }
 
 // Render poems into pages

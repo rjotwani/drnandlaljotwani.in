@@ -199,6 +199,19 @@ header a:hover {
   gap: clamp(1rem, 3vw, 2.5rem);
   align-items: start;
 }
+.page.translation-visible .poem-body {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  max-width: 100%;
+}
+.page.translation-visible .original,
+.page.translation-visible .translation {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
 .page:not(.translation-visible) .poem-body {
   margin-left: clamp(2rem, 6vw, 4rem);
 }
@@ -217,22 +230,42 @@ header a:hover {
 }
 .page.translation-visible .original {
   text-align: right;
-  font-size: clamp(0.85rem, 1.8vw, 1.2rem);
-  line-height: 1.6;
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  line-height: 1.5;
+  margin-top: 0;
+  padding-top: 0;
+}
+.page.translation-visible .original br {
+  line-height: 0.3;
+  margin-bottom: 0.15em;
+  height: 0.3em;
+  display: block;
 }
 .translation {
   font-style: italic;
   color: #4e3a30;
-  font-size: clamp(0.85rem, 1.8vw, 1.2rem);
-  line-height: 1.6;
+  font-size: clamp(1.15rem, 2.5vw, 1.9rem);
+  line-height: 1.8;
   padding: 0;
   margin: 0;
   display: none;
+}
+.page.translation-visible .translation {
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  line-height: 1.5;
+  margin-top: 0;
+  padding-top: 0;
 }
 .translation br {
   line-height: 0.4;
   display: block;
   margin-bottom: 0.2em;
+}
+.page.translation-visible .translation br {
+  line-height: 0.3;
+  margin-bottom: 0.15em;
+  height: 0.3em;
+  display: block;
 }
 .translation.visible {
   display: block;
