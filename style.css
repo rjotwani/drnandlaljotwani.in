@@ -196,6 +196,23 @@ header p a:hover {
   scrollbar-gutter: stable both-edges;
   position: relative;
 }
+.page-content.has-more-content {
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(100% - 50px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(100% - 50px),
+    transparent 100%
+  );
+}
+.scroll-shadow {
+  display: none;
+}
 .page-content::-webkit-scrollbar {
   width: 6px;
 }

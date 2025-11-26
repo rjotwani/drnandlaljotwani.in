@@ -105,11 +105,19 @@ function renderPoems() {
     scrollHint.textContent = "Scroll inside the page to read the full poem";
     footer.appendChild(scrollHint);
 
+    // Add scroll shadow element for mobile
+    const scrollShadow = document.createElement("div");
+    scrollShadow.className = "scroll-shadow";
+    pageContent.appendChild(scrollShadow);
+
     page.appendChild(pageContent);
     page.appendChild(footer);
     pagesContainer.appendChild(page);
     pages.push(page);
   });
+  
+  // Setup scroll shadows after rendering
+  setTimeout(() => setupScrollShadows(), 0);
 }
 
 function updatePages() {
@@ -133,8 +141,44 @@ function changePage(delta) {
     const activeContent = pages[currentPage].querySelector(".page-content");
     if (activeContent) {
       activeContent.scrollTop = 0;
+      updateScrollShadow(activeContent);
     }
   }
+}
+
+// Update scroll shadow visibility based on scroll position
+function updateScrollShadow(element) {
+  if (!element) return;
+  
+  const isMobile = window.matchMedia("(max-width: 700px)").matches;
+  if (!isMobile) {
+    element.classList.remove("has-more-content");
+    return;
+  }
+  
+  const { scrollTop, scrollHeight, clientHeight } = element;
+  const isAtBottom = scrollHeight - scrollTop - clientHeight < 10; // 10px threshold
+  
+  if (isAtBottom) {
+    element.classList.remove("has-more-content");
+  } else {
+    element.classList.add("has-more-content");
+  }
+  
+}
+
+// Setup scroll listeners for all page-content elements
+function setupScrollShadows() {
+  const isMobile = window.matchMedia("(max-width: 700px)").matches;
+  
+  document.querySelectorAll(".page-content").forEach((content) => {
+    updateScrollShadow(content);
+    // Add scroll listener if not already added
+    if (!content.dataset.scrollListenerAdded) {
+      content.addEventListener("scroll", () => updateScrollShadow(content), { passive: true });
+      content.dataset.scrollListenerAdded = "true";
+    }
+  });
 }
 
 // Keyboard navigation
@@ -195,6 +239,11 @@ function setupTranslationToggles() {
       const visible = translation.classList.toggle("visible");
       page.classList.toggle("translation-visible", visible);
       button.textContent = visible ? "Hide translation" : "Show translation";
+      // Update scroll shadow after translation toggle (content height may change)
+      const pageContent = page.querySelector(".page-content");
+      if (pageContent) {
+        setTimeout(() => updateScrollShadow(pageContent), 100);
+      }
     });
   });
 }
@@ -203,6 +252,7 @@ function setupTranslationToggles() {
 renderPoems();
 setupTranslationToggles();
 updatePages();
+setupScrollShadows();
 
 // Open the notebook when it scrolls into view or is clicked
 function setupNotebookReveal() {
@@ -259,4 +309,13 @@ function setupNotebookReveal() {
 }
 
 setupNotebookReveal();
+
+// Update scroll shadows on window resize (e.g., device rotation)
+let resizeTimeout;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    setupScrollShadows();
+  }, 150);
+}, { passive: true });
 
