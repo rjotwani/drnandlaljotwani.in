@@ -7,6 +7,7 @@ const nextBtn = document.getElementById("nextPage");
 // State
 let pages = [];
 let currentPage = 0;
+let poems = []; // Will be loaded from YAML files
 
 // Split text into stanzas (paragraphs separated by blank lines)
 function splitIntoStanzas(text) {
@@ -316,11 +317,37 @@ function setupTranslationToggles() {
   });
 }
 
-// Initialize
-renderPoems();
-setupTranslationToggles();
-updatePages();
-setupScrollShadows();
+// Load poems from YAML files
+async function loadPoems() {
+  try {
+    // Load the index.json to get the list of YAML files
+    const indexResponse = await fetch('poems/index.json');
+    const indexData = await indexResponse.json();
+    
+    // Load and parse each YAML file
+    const poemPromises = indexData.poems.map(async (filename) => {
+      const yamlResponse = await fetch(`poems/${filename}`);
+      const yamlText = await yamlResponse.text();
+      const poem = jsyaml.load(yamlText);
+      return poem;
+    });
+    
+    // Wait for all poems to load
+    poems = await Promise.all(poemPromises);
+    
+    // Initialize the notebook once all poems are loaded
+    renderPoems();
+    setupTranslationToggles();
+    updatePages();
+    setupScrollShadows();
+  } catch (error) {
+    console.error('Error loading poems:', error);
+    pagesContainer.innerHTML = '<p style="padding: 2rem; text-align: center;">Error loading poems. Please check the console for details.</p>';
+  }
+}
+
+// Initialize - load poems first, then render
+loadPoems();
 
 // Open the notebook when it scrolls into view or is clicked
 function setupNotebookReveal() {
