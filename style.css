@@ -489,9 +489,76 @@ header > a:hover {
     grid-template-columns: 1fr !important;
     margin-left: 0 !important;
   }
+  .page.translation-visible .poem-body {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1rem;
+  }
+  .page.translation-visible .original {
+    text-align: right;
+    font-size: clamp(0.7rem, 2vw, 0.85rem);
+    line-height: 1.4;
+  }
+  .page.translation-visible .translation {
+    font-size: clamp(0.7rem, 2vw, 0.85rem);
+    line-height: 1.4;
+    text-align: left;
+  }
   .page-content {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(58, 46, 40, 0.7) rgba(0, 0, 0, 0.2);
+    position: relative;
+    padding-right: 1.5rem;
+    /* Add subtle border on right to indicate scroll area */
+    border-right: 2px solid rgba(58, 46, 40, 0.15);
+  }
+  /* Fade gradient overlay at bottom of content area to indicate scrollable content */
+  .page.active .page-content {
+    position: relative;
+  }
+  .page.active .page-content::after {
+    content: "";
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 1.5rem;
+    height: 50px;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 253, 248, 0),
+      rgba(255, 253, 248, 0.6) 50%,
+      rgba(255, 253, 248, 0.95)
+    );
+    pointer-events: none;
+    z-index: 2;
+    margin-top: -50px;
+    display: block;
+  }
+  .page-content::-webkit-scrollbar {
+    width: 12px;
+    -webkit-appearance: none;
+  }
+  .page-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin: 6px 0;
+    /* Make track always visible */
+    -webkit-box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
+  }
+  .page-content::-webkit-scrollbar-thumb {
+    background: rgba(58, 46, 40, 0.75);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    min-height: 50px;
+    /* Add shadow for depth */
+    -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  .page-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(58, 46, 40, 0.9);
   }
   .page-navigation {
     position: relative;
