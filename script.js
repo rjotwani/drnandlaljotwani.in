@@ -79,8 +79,10 @@ stage.addEventListener(
 
 document.querySelectorAll(".toggle-translation").forEach((button) => {
   button.addEventListener("click", () => {
-    const translation = button.closest(".page").querySelector(".translation");
+    const page = button.closest(".page");
+    const translation = page.querySelector(".translation");
     const visible = translation.classList.toggle("visible");
+    page.classList.toggle("translation-visible", visible);
     button.textContent = visible ? "Hide translation" : "Show translation";
   });
 });

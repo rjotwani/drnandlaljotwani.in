@@ -188,7 +188,7 @@ header a:hover {
   opacity: 1;
 }
 .page h2 {
-  font-family: "Playfair Display", serif;
+  font-family: "Aref Ruqaa Ink", "Lateef", serif;
   margin: 0;
   font-size: 1.4rem;
   letter-spacing: 0.05em;
@@ -199,13 +199,19 @@ header a:hover {
   gap: clamp(1rem, 3vw, 2.5rem);
   align-items: start;
 }
+.page:not(.translation-visible) .poem-body {
+  margin-left: clamp(2rem, 6vw, 4rem);
+}
 .original {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
   font-size: clamp(1.15rem, 2.5vw, 1.9rem);
   line-height: 1.8;
-  text-align: right;
+  text-align: left;
   padding: 0;
   margin: 0;
+}
+.page.translation-visible .original {
+  text-align: right;
 }
 .translation {
   font-style: italic;
