@@ -257,6 +257,7 @@ window.addEventListener("keydown", (event) => {
 prevBtn.addEventListener("click", () => changePage(-1));
 nextBtn.addEventListener("click", () => changePage(1));
 
+
 // Touch swipe handling
 const stage = document.querySelector(".notebook-stage");
 let touchStartX = 0;
@@ -433,6 +434,27 @@ function setupNotebookReveal() {
 }
 
 setupNotebookReveal();
+
+// Scroll indicator click handler
+const scrollIndicator = document.querySelector(".scroll-indicator");
+if (scrollIndicator) {
+  scrollIndicator.addEventListener("click", () => {
+    const notebookStage = document.querySelector(".notebook-stage");
+    if (notebookStage) {
+      // Calculate position just above the notebook (with some offset)
+      const rect = notebookStage.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const targetPosition = rect.top + scrollTop - 60; // 60px offset above
+      
+      window.scrollTo({
+        top: targetPosition,
+        behavior: "smooth"
+      });
+      // Hide the indicator after clicking
+      hideScrollIndicator();
+    }
+  });
+}
 
 // Hide scroll indicator on scroll
 let scrollIndicatorHidden = false;

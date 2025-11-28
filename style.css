@@ -132,15 +132,29 @@ header .credentials {
   margin: var(--space-md) 0 var(--space-lg) 0;
   opacity: 1;
   transition: opacity 600ms ease, transform 600ms ease;
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 10;
   flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: var(--space-sm);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.scroll-indicator:hover {
+  transform: translateY(2px);
+}
+
+.scroll-indicator:active {
+  transform: translateY(4px);
 }
 
 .scroll-indicator.hidden {
   opacity: 0;
   transform: translateY(-10px);
   pointer-events: none;
+  cursor: default;
 }
 
 .scroll-indicator svg {
@@ -616,42 +630,46 @@ header .credentials {
    ============================================ */
 @media (max-width: 700px) {
   body {
-    padding: var(--space-md);
-    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    gap: var(--space-sm);
   }
 
   header {
     max-width: 95vw;
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-sm);
   }
 
   header h1 {
     font-size: 2.2rem;
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-xs);
+  }
+
+  header .credentials {
+    margin-bottom: var(--space-sm);
   }
 
   .bio {
-    padding: var(--space-lg) var(--space-md);
+    padding: var(--space-md) var(--space-sm);
     max-width: 95vw;
   }
 
   .bio-section {
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-sm);
   }
 
   .bio-section.contact {
-    margin-top: var(--space-lg);
-    padding-top: var(--space-md);
+    margin-top: var(--space-md);
+    padding-top: var(--space-sm);
   }
 
   .bio-line {
     font-size: 0.8rem;
-    line-height: 1.6;
+    line-height: 1.5;
     margin-bottom: var(--space-xs);
   }
 
   .scroll-indicator {
-    margin: var(--space-md) 0;
+    margin: var(--space-sm) 0;
   }
 
   .scroll-indicator svg {
