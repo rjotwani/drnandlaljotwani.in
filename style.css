@@ -791,3 +791,212 @@ header .credentials {
     padding: 0 var(--space-md);
   }
 }
+
+/* ============================================
+   Landscape Orientation
+   ============================================ */
+@media (orientation: landscape) and (max-height: 600px),
+       (max-height: 500px) {
+  body {
+    padding: var(--space-sm) var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  header {
+    max-width: 95vw;
+    margin-bottom: var(--space-xs);
+  }
+
+  header h1 {
+    font-size: 1.8rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  header .credentials {
+    margin-bottom: var(--space-xs);
+    font-size: 1rem;
+  }
+
+  .bio {
+    padding: var(--space-sm) var(--space-xs);
+    max-width: 95vw;
+    margin-bottom: var(--space-xs);
+  }
+
+  .bio-section {
+    margin-bottom: var(--space-xs);
+  }
+
+  .bio-section.contact {
+    margin-top: var(--space-sm);
+    padding-top: var(--space-xs);
+  }
+
+  .bio-line {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+  }
+
+  .scroll-indicator {
+    margin: var(--space-xs) 0;
+  }
+
+  .scroll-indicator svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .notebook-stage {
+    width: min(95vw, 100vw);
+    aspect-ratio: 4 / 3;
+    max-height: 60vh;
+    min-height: 300px;
+    perspective: none;
+    margin-top: var(--space-xs);
+    margin-bottom: var(--space-lg);
+  }
+
+  .notebook {
+    transform: none !important;
+    transform-style: flat;
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.15),
+      inset 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+
+  .notebook.open {
+    transform: none !important;
+  }
+
+  .cover.front {
+    transform: none !important;
+    display: none;
+  }
+
+  .cover.back {
+    display: none;
+  }
+
+  .spine {
+    display: none;
+  }
+
+  .pages {
+    perspective: none;
+    transform-style: flat;
+    inset: 0;
+  }
+
+  .page {
+    backface-visibility: visible !important;
+    transform-style: flat;
+    transform: none !important;
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease;
+    padding: clamp(0.8rem, 2vw, 1.2rem);
+    box-shadow:
+      inset 0 0 2px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(0, 0, 0, 0.02);
+  }
+
+  .page::after {
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.06);
+  }
+
+  .page.active {
+    opacity: 1 !important;
+    pointer-events: auto;
+    z-index: 10;
+  }
+
+  .page.flipped {
+    display: none;
+  }
+
+  .page h2 {
+    font-size: 1.1rem;
+    margin-bottom: var(--space-xs);
+  }
+
+  .page header .title-translation {
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+  }
+
+  .poem-body {
+    grid-template-columns: 1fr !important;
+    margin-left: 0 !important;
+    gap: var(--space-sm);
+  }
+
+  .page.translation-visible .poem-body {
+    grid-template-columns: 1fr 1fr !important;
+    gap: var(--space-sm);
+  }
+
+  .page.translation-visible .stanza-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: var(--space-xs);
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  .original {
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    line-height: 1.6;
+  }
+
+  .stanza-cell.original {
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    line-height: 1.4;
+  }
+
+  .stanza-cell.translation {
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    line-height: 1.4;
+  }
+
+  .page-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: var(--space-sm);
+  }
+
+  .page footer {
+    padding-top: 0.1rem;
+    font-size: 0.8rem;
+  }
+
+  .toggle-translation {
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+
+  .page-navigation {
+    position: relative;
+    inset: auto;
+    margin-top: var(--space-sm);
+  }
+
+  .nav-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+  }
+
+  .scroll-hint {
+    font-size: 0.65rem;
+    color: rgba(90, 70, 60, 0.95);
+    text-align: center;
+  }
+
+  .instruction {
+    margin-top: var(--space-sm);
+    font-size: 0.75rem;
+    padding: 0 var(--space-sm);
+  }
+}
