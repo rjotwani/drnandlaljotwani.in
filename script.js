@@ -372,6 +372,14 @@ async function loadPoems() {
 // Initialize - load poems first, then render
 loadPoems();
 
+// Hide scroll indicator
+function hideScrollIndicator() {
+  const indicator = document.querySelector(".scroll-indicator");
+  if (indicator) {
+    indicator.classList.add("hidden");
+  }
+}
+
 // Open the notebook when it scrolls into view or is clicked
 function setupNotebookReveal() {
   const target = document.querySelector(".notebook-stage");
@@ -381,6 +389,8 @@ function setupNotebookReveal() {
     if (notebook.classList.contains("open")) return;
     
     notebook.classList.add("open");
+    // Hide the scroll indicator when notebook opens
+    hideScrollIndicator();
     // Hide the cover label after the flip animation has finished
     setTimeout(() => {
       notebook.classList.add("label-hidden");
@@ -423,6 +433,18 @@ function setupNotebookReveal() {
 }
 
 setupNotebookReveal();
+
+// Hide scroll indicator on scroll
+let scrollIndicatorHidden = false;
+window.addEventListener("scroll", () => {
+  if (!scrollIndicatorHidden) {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    if (scrollY > 100) {
+      hideScrollIndicator();
+      scrollIndicatorHidden = true;
+    }
+  }
+}, { passive: true });
 
 // Update scroll shadows on window resize (e.g., device rotation)
 let resizeTimeout;

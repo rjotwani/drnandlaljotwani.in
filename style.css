@@ -1,3 +1,6 @@
+/* ============================================
+   CSS Variables & Base Styles
+   ============================================ */
 :root {
   color-scheme: light;
   --bg: #f6efe5;
@@ -6,10 +9,21 @@
   --accent-dark: #835737;
   --paper: #fffdf8;
   --shadow: rgba(0, 0, 0, 0.15);
+  
+  /* Spacing scale */
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
 }
+
 * {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   min-height: 100dvh;
@@ -20,65 +34,146 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: clamp(1.2rem, 4vw, 3rem);
-  gap: 1.5rem;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1.2rem, 4vw, 3rem);
+  gap: var(--space-md);
   overflow-x: hidden;
 }
+
+/* ============================================
+   Header Section
+   ============================================ */
 header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-lg);
   max-width: min(900px, 90vw);
   width: 100%;
 }
+
 header h1 {
   font-family: "Playfair Display", serif;
   font-size: clamp(2.5rem, 4vw, 3.5rem);
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 var(--space-xs) 0;
 }
-header p {
-  margin: 0 auto 1.5rem;
-  font-size: clamp(0.85rem, 1.4vw, 0.95rem);
-  line-height: 1.8;
-  color: #5c473c;
-  text-align: center;
-  max-width: min(700px, 75vw);
-  padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  border: 1px solid rgba(190, 140, 99, 0.2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-header p.credentials {
+
+header .credentials {
   padding: 0;
   background: none;
   border: none;
   box-shadow: none;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-xl);
   font-size: clamp(1.2rem, 2vw, 1.4rem);
   font-weight: 500;
   max-width: 100%;
+  color: var(--ink);
 }
-header p br {
-  display: block;
-  margin: 0.4em 0;
+
+.bio {
+  max-width: min(750px, 82vw);
+  margin: 0 auto;
+  padding: var(--space-lg) clamp(var(--space-lg), 4vw, var(--space-2xl));
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(190, 140, 99, 0.25);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-header p a {
+
+.bio-section {
+  margin-bottom: var(--space-md);
+}
+
+.bio-section:last-child {
+  margin-bottom: 0;
+}
+
+.bio-section.contact {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(190, 140, 99, 0.2);
+}
+
+.bio-line {
+  margin: 0 0 var(--space-sm) 0;
+  font-size: clamp(0.85rem, 1.4vw, 0.95rem);
+  line-height: 1.7;
+  color: #5c473c;
+  text-align: left;
+}
+
+.bio-line:last-child {
+  margin-bottom: 0;
+}
+
+.bio-line strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.bio-line a {
   color: var(--accent-dark);
   text-decoration: none;
   font-weight: 500;
   border-bottom: 1px dotted var(--accent);
+  transition: color 150ms ease, border-bottom-color 150ms ease;
 }
-header p a:hover {
+
+.bio-line a:hover {
   color: var(--accent);
   border-bottom-color: var(--accent-dark);
 }
+
+/* ============================================
+   Scroll Indicator (Floating Arrow)
+   ============================================ */
+.scroll-indicator {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: var(--space-md) 0 var(--space-lg) 0;
+  opacity: 1;
+  transition: opacity 600ms ease, transform 600ms ease;
+  pointer-events: none;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.scroll-indicator.hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.scroll-indicator svg {
+  width: 40px;
+  height: 40px;
+  color: var(--accent-dark);
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.25));
+  animation: float-arrow 2s ease-in-out infinite;
+}
+
+@keyframes float-arrow {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(12px);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   Notebook Container
+   ============================================ */
 .notebook-stage {
   width: min(900px, 90vw);
   aspect-ratio: 3 / 2.3;
   perspective: 1800px;
   position: relative;
   max-height: 90vh;
+  margin-top: var(--space-md);
 }
+
 .notebook {
   width: 100%;
   height: 100%;
@@ -91,9 +186,14 @@ header p a:hover {
   transition: transform 1200ms ease;
   transform: rotateX(12deg);
 }
+
 .notebook.open {
   transform: rotateX(0deg);
 }
+
+/* ============================================
+   Notebook Cover & Spine
+   ============================================ */
 .cover {
   position: absolute;
   inset: 0;
@@ -101,12 +201,14 @@ header p a:hover {
   border-radius: 24px;
   box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
 }
+
 .cover.front {
   transform-origin: left;
   transform: rotateY(0deg);
   transition: transform 1200ms ease;
   z-index: 5;
 }
+
 .cover.front::after {
   content: "Dr. Nandlal Jotwani · Sindhi Verse";
   position: absolute;
@@ -131,15 +233,19 @@ header p a:hover {
   text-transform: uppercase;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
 }
+
 .notebook.label-hidden .cover.front::after {
   display: none;
 }
+
 .notebook.open .cover.front {
   transform: rotateY(-150deg);
 }
+
 .cover.back {
   background: linear-gradient(135deg, #2d1707, #513115);
 }
+
 .spine {
   position: absolute;
   top: 0;
@@ -150,6 +256,10 @@ header p a:hover {
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
   z-index: 1;
 }
+
+/* ============================================
+   Pages Container
+   ============================================ */
 .pages {
   position: absolute;
   inset: 4% 4%;
@@ -160,6 +270,7 @@ header p a:hover {
   transform-style: preserve-3d;
   z-index: 2;
 }
+
 .page {
   position: absolute;
   inset: 0;
@@ -182,9 +293,28 @@ header p a:hover {
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-md);
   overflow: hidden;
 }
+
+.page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+.page.active::after {
+  opacity: 1;
+}
+
+/* ============================================
+   Page Content
+   ============================================ */
 .page-content {
   display: flex;
   flex-direction: column;
@@ -196,6 +326,7 @@ header p a:hover {
   scrollbar-gutter: stable both-edges;
   position: relative;
 }
+
 .page-content.has-more-content-bottom {
   mask-image: linear-gradient(
     to bottom,
@@ -210,6 +341,7 @@ header p a:hover {
     transparent 100%
   );
 }
+
 .page-content.has-more-content-top {
   mask-image: linear-gradient(
     to bottom,
@@ -224,6 +356,7 @@ header p a:hover {
     black 100%
   );
 }
+
 .page-content.has-more-content-top.has-more-content-bottom {
   mask-image: linear-gradient(
     to bottom,
@@ -240,36 +373,31 @@ header p a:hover {
     transparent 100%
   );
 }
+
 .page-content::-webkit-scrollbar {
   width: 6px;
 }
+
 .page-content::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 999px;
 }
+
 .page-content::-webkit-scrollbar-thumb {
   background: rgba(58, 46, 40, 0.35);
   border-radius: 999px;
 }
-.page::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  box-shadow: 5px 0 20px rgba(0, 0, 0, 0.08);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 300ms ease;
-}
-.page.active::after {
-  opacity: 1;
-}
+
+/* ============================================
+   Poem Typography
+   ============================================ */
 .page h2 {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
   margin: 0;
   font-size: 1.4rem;
   letter-spacing: 0.05em;
 }
+
 .page header .title-translation {
   font-family: "Spectral", serif;
   font-size: 1rem;
@@ -279,21 +407,25 @@ header p a:hover {
   margin: 0.4rem 0 0 0;
   letter-spacing: 0.02em;
 }
+
 .poem-body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: clamp(1rem, 3vw, 2.5rem);
   align-items: start;
 }
+
 .page.translation-visible .poem-body {
   align-items: start;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: clamp(1.5rem, 4vw, 3rem);
   max-width: 100%;
 }
+
 .page:not(.translation-visible) .poem-body {
   margin-left: clamp(2rem, 6vw, 4rem);
 }
+
 /* Stanza grid for aligned display */
 .stanza-grid {
   display: none;
@@ -301,17 +433,21 @@ header p a:hover {
   gap: clamp(1rem, 2.5vw, 2rem);
   width: 100%;
 }
+
 .page.translation-visible .stanza-grid {
   display: grid;
-  grid-column: 1 / -1; /* Span both columns of the parent grid */
+  grid-column: 1 / -1;
   width: 100%;
 }
+
 .page.translation-visible .poem-body > .original {
   display: none;
 }
+
 .stanza-row {
   display: contents;
 }
+
 .stanza-cell {
   padding: 0;
   margin: 0;
@@ -319,18 +455,21 @@ header p a:hover {
   overflow-wrap: break-word;
   hyphens: auto;
 }
+
 .stanza-cell.original {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
   font-size: clamp(0.75rem, 1.5vw, 1rem);
   line-height: 1.5;
   text-align: right;
 }
+
 .stanza-cell.original br {
   line-height: 0.7;
   margin-bottom: 0.4em;
   height: 0.7em;
   display: block;
 }
+
 .stanza-cell.translation {
   font-style: italic;
   color: #4e3a30;
@@ -338,12 +477,14 @@ header p a:hover {
   line-height: 1.5;
   text-align: left;
 }
+
 .stanza-cell.translation br {
   line-height: 0.7;
   margin-bottom: 0.4em;
   height: 0.7em;
   display: block;
 }
+
 .original {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
   font-size: clamp(1.15rem, 2.5vw, 1.9rem);
@@ -352,15 +493,20 @@ header p a:hover {
   padding: 0;
   margin: 0;
 }
+
 .original br {
   line-height: 0.4;
   display: block;
   margin-bottom: 0.2em;
 }
+
+/* ============================================
+   Page Footer
+   ============================================ */
 .page footer {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-xs);
   font-size: 0.9rem;
   color: #7a6456;
   flex-shrink: 0;
@@ -371,17 +517,20 @@ header p a:hover {
     rgba(255, 255, 255, 0)
   );
 }
+
 .footer-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .scroll-hint {
   font-size: 0.75rem;
   color: rgba(90, 70, 60, 0.85);
   text-align: center;
   opacity: 0.85;
 }
+
 .toggle-translation {
   border: none;
   background: var(--accent);
@@ -392,24 +541,38 @@ header p a:hover {
   cursor: pointer;
   font-family: inherit;
   transition: transform 150ms ease, box-shadow 150ms ease;
+  min-height: 44px; /* Better touch target */
 }
+
 .toggle-translation:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
+
+.toggle-translation:active {
+  transform: translateY(0);
+}
+
 .page-count {
   font-variant-numeric: tabular-nums;
 }
+
+/* ============================================
+   Navigation
+   ============================================ */
 .page-navigation {
   position: absolute;
-  inset: auto 0 -3.5rem;
+  inset: auto 0 -4.5rem;
   display: flex;
   justify-content: center;
-  gap: 1.5rem;
+  gap: var(--space-lg);
 }
+
 .nav-btn {
   width: 54px;
   height: 54px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   border: none;
   background: #fffdf8;
@@ -419,79 +582,121 @@ header p a:hover {
   cursor: pointer;
   font-size: 1.6rem;
   color: var(--accent-dark);
-  transition: transform 150ms ease;
+  transition: transform 150ms ease, box-shadow 150ms ease;
 }
+
 .nav-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   transform: none;
 }
+
 .nav-btn:not(:disabled):hover {
   transform: translateY(-2px);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
+
+.nav-btn:not(:disabled):active {
+  transform: translateY(0);
+}
+
 .instruction {
-  margin-top: 3.5rem;
+  margin-top: 4.5rem;
   text-align: center;
   font-size: 0.95rem;
   color: #5d4a40;
+  max-width: min(700px, 85vw);
+  line-height: 1.6;
 }
+
+/* ============================================
+   Responsive Design
+   ============================================ */
 @media (max-width: 700px) {
+  body {
+    padding: var(--space-md);
+    gap: var(--space-md);
+  }
+
   header {
     max-width: 95vw;
+    margin-bottom: var(--space-lg);
   }
+
   header h1 {
     font-size: 2.2rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-md);
   }
-  header p {
+
+  .bio {
+    padding: var(--space-lg) var(--space-md);
+    max-width: 95vw;
+  }
+
+  .bio-section {
+    margin-bottom: var(--space-md);
+  }
+
+  .bio-section.contact {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+  }
+
+  .bio-line {
     font-size: 0.8rem;
-    line-height: 1.7;
-    padding: 1rem 1.2rem;
-    text-align: center;
-    max-width: 90vw;
+    line-height: 1.6;
+    margin-bottom: var(--space-xs);
   }
-  header p.credentials {
-    padding: 0;
-    background: none;
-    border: none;
-    box-shadow: none;
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    max-width: 100%;
+
+  .scroll-indicator {
+    margin: var(--space-md) 0;
   }
-  header p br {
-    margin: 0.35em 0;
+
+  .scroll-indicator svg {
+    width: 36px;
+    height: 36px;
   }
+
   .notebook-stage {
     width: min(95vw, 100vw);
     aspect-ratio: 4 / 5;
     max-height: 85vh;
     min-height: 450px;
     perspective: none;
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-2xl);
   }
+
   .notebook {
     transform: none !important;
     transform-style: flat;
   }
+
   .notebook.open {
     transform: none !important;
   }
+
   .cover.front {
     transform: none !important;
     display: none;
   }
+
   .cover.back {
     display: none;
   }
+
   .spine {
     display: none;
   }
+
   .pages {
     perspective: none;
     transform-style: flat;
     inset: 0;
   }
+
   .page {
     backface-visibility: visible !important;
     transform-style: flat;
@@ -501,49 +706,70 @@ header p a:hover {
     pointer-events: none;
     transition: opacity 300ms ease;
   }
+
   .page.active {
     opacity: 1 !important;
     pointer-events: auto;
     z-index: 10;
   }
+
   .page.flipped {
     display: none;
   }
+
   .poem-body {
     grid-template-columns: 1fr !important;
     margin-left: 0 !important;
   }
+
   .page.translation-visible .poem-body {
     grid-template-columns: 1fr 1fr !important;
-    gap: 1rem;
+    gap: var(--space-md);
   }
+
   .page.translation-visible .stanza-grid {
     grid-template-columns: 1fr 1fr !important;
-    gap: 0.75rem;
-    grid-column: 1 / -1 !important; /* Ensure it spans full width on mobile too */
+    gap: var(--space-sm);
+    grid-column: 1 / -1 !important;
     width: 100% !important;
   }
+
   .stanza-cell.original {
     font-size: clamp(0.95rem, 2.5vw, 1.15rem);
     line-height: 1.5;
   }
+
   .stanza-cell.translation {
     font-size: clamp(0.95rem, 2.5vw, 1.15rem);
     line-height: 1.5;
   }
+
   .page-content {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+
   .page-navigation {
     position: relative;
     inset: auto;
-    margin-top: 1rem;
+    margin-top: var(--space-md);
   }
+
+  .nav-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+  }
+
   .scroll-hint {
     font-size: 0.7rem;
     color: rgba(90, 70, 60, 0.95);
     text-align: center;
   }
-}
 
+  .instruction {
+    margin-top: var(--space-md);
+    font-size: 0.85rem;
+    padding: 0 var(--space-md);
+  }
+}
