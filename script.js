@@ -31,6 +31,7 @@ let isMobileDeviceCache = null;
 let cachedWindowWidth = null;
 let cachedWindowHeight = null;
 let cachedTouchSupport = null;
+let translationVisibilityObserver = null;
 
 // Event handlers for cleanup
 const eventHandlers = {
@@ -323,6 +324,8 @@ function changePage(delta) {
           });
         });
       }
+        // Re-observe for translation button visibility on the new page
+        observeActivePageForTranslationButton();
     }
   }
 }
@@ -372,6 +375,73 @@ function updateFloatingButton() {
   }
 }
 
+// Control visibility of the floating translation button on mobile
+function showFloatingTranslationButton() {
+  if (floatingTranslationButton && isMobileDevice()) {
+    floatingTranslationButton.classList.remove('translation-toggle-hidden');
+  }
+}
+
+function hideFloatingTranslationButton() {
+  if (floatingTranslationButton && isMobileDevice()) {
+    floatingTranslationButton.classList.add('translation-toggle-hidden');
+  }
+}
+
+// Observe the active poem body to decide when to show the floating translation button
+function observeActivePageForTranslationButton() {
+  if (!isMobileDevice() || !floatingTranslationButton) return;
+
+  // Fallback: if IntersectionObserver is not supported, just show the button when the notebook is open
+  if (!('IntersectionObserver' in window)) {
+    const notebookElement = notebook;
+    if (notebookElement && notebookElement.classList.contains('open')) {
+      showFloatingTranslationButton();
+    } else {
+      hideFloatingTranslationButton();
+    }
+    return;
+  }
+
+  if (translationVisibilityObserver) {
+    translationVisibilityObserver.disconnect();
+    translationVisibilityObserver = null;
+  }
+
+  const activePage = pages[currentPage];
+  if (!activePage) {
+    hideFloatingTranslationButton();
+    return;
+  }
+
+  const poemBody = activePage.querySelector('.poem-body');
+  if (!poemBody) {
+    hideFloatingTranslationButton();
+    return;
+  }
+
+  translationVisibilityObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.target !== poemBody) return;
+        // Show the button as soon as any part of the poem body is visible
+        if (entry.isIntersecting) {
+          showFloatingTranslationButton();
+        } else {
+          hideFloatingTranslationButton();
+        }
+      });
+    },
+    {
+      root: null,
+      // Trigger as soon as the element enters or leaves the viewport
+      threshold: [0]
+    }
+  );
+
+  translationVisibilityObserver.observe(poemBody);
+}
+
 function setupTranslationToggles() {
   // Invalidate cache since device type might have changed
   invalidateMobileCache();
@@ -392,11 +462,10 @@ function setupTranslationToggles() {
     
     // Create a single floating translation button for mobile
     floatingTranslationButton = document.createElement('button');
-    floatingTranslationButton.className = 'toggle-translation';
+    floatingTranslationButton.className = 'toggle-translation translation-toggle-hidden';
     floatingTranslationButton.type = 'button';
     floatingTranslationButton.textContent = 'Show translation';
     floatingTranslationButton.setAttribute('aria-label', 'Toggle translation visibility');
-    floatingTranslationButton.style.display = 'block';
     document.body.appendChild(floatingTranslationButton);
     
     // Toggle translation for the active page
@@ -411,8 +480,12 @@ function setupTranslationToggles() {
     floatingTranslationButton.addEventListener('click', floatingButtonHandler);
     eventHandlers.floatingButton = floatingButtonHandler;
     
-    // Initial update
+    // Initial text update
     updateFloatingButton();
+    // Start observing visibility if the notebook is already open
+    if (notebook && notebook.classList.contains('open')) {
+      observeActivePageForTranslationButton();
+    }
   } else {
     // Desktop: use buttons in each page footer
     // Remove floating button if it exists
@@ -560,6 +633,8 @@ function setupNotebookReveal() {
     
     notebook.classList.add('open');
     hideScrollIndicator();
+    // Once the notebook is open, start observing poem visibility for the mobile translation button
+    observeActivePageForTranslationButton();
     setTimeout(() => {
       notebook.classList.add('label-hidden');
     }, LABEL_HIDE_DELAY);
