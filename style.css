@@ -28,15 +28,28 @@ html {
   height: 100%;
   min-height: 100%;
   background-color: #ddc8af; /* Fallback color matching gradient end */
-  background-image: radial-gradient(circle at top, #fefbf7 0%, #ecdfcf 60%, #ddc8af 100%);
+  position: relative;
   /* Background extends into safe areas and overscroll areas on iOS */
+}
+
+html::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(ellipse 150% 300% at 50% 0%, #fefbf7 0%, #ecdfcf 50%, #ddc8af 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  z-index: -1;
+  pointer-events: none;
 }
 
 body {
   margin: 0;
   min-height: 100dvh;
-  background-color: #ddc8af; /* Fallback color matching gradient end */
-  background-image: radial-gradient(circle at top, #fefbf7 0%, #ecdfcf 60%, #ddc8af 100%);
+  background-color: transparent; /* Let html background show through */
   font-family: "Spectral", serif;
   color: var(--ink);
   display: flex;
@@ -571,6 +584,11 @@ header .credentials {
   min-height: 44px; /* Better touch target */
 }
 
+/* Hide floating button on desktop */
+body > .toggle-translation {
+  display: none;
+}
+
 .toggle-translation:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
@@ -641,7 +659,8 @@ header .credentials {
 /* ============================================
    Responsive Design
    ============================================ */
-@media (max-width: 700px) {
+@media (max-width: 700px),
+       (max-width: 1000px) and (max-height: 500px) and (orientation: landscape) {
   body {
     padding: var(--space-sm) var(--space-md);
     gap: var(--space-sm);
@@ -692,9 +711,10 @@ header .credentials {
 
   .notebook-stage {
     width: min(95vw, 100vw);
-    aspect-ratio: 4 / 5;
-    max-height: 85vh;
-    min-height: 450px;
+    aspect-ratio: unset;
+    max-height: none;
+    min-height: unset;
+    height: auto;
     perspective: none;
     margin-top: var(--space-md);
     margin-bottom: var(--space-2xl);
@@ -703,6 +723,8 @@ header .credentials {
   .notebook {
     transform: none !important;
     transform-style: flat;
+    height: auto;
+    min-height: auto;
   }
 
   .notebook.open {
@@ -726,6 +748,11 @@ header .credentials {
     perspective: none;
     transform-style: flat;
     inset: 0;
+    position: relative;
+    height: auto;
+    min-height: auto;
+    padding: 0;
+    border-radius: 16px;
   }
 
   .page {
@@ -736,12 +763,16 @@ header .credentials {
     opacity: 0;
     pointer-events: none;
     transition: opacity 300ms ease;
+    height: auto;
+    min-height: auto;
+    width: 100%;
   }
 
   .page.active {
     opacity: 1 !important;
     pointer-events: auto;
     z-index: 10;
+    position: relative;
   }
 
   .page.flipped {
@@ -776,8 +807,10 @@ header .credentials {
   }
 
   .page-content {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: auto;
+    height: auto;
+    min-height: auto;
   }
 
   .page-navigation {
@@ -793,9 +826,33 @@ header .credentials {
   }
 
   .scroll-hint {
-    font-size: 0.7rem;
-    color: rgba(90, 70, 60, 0.95);
-    text-align: center;
+    display: none;
+  }
+
+  /* Floating translation button on mobile */
+  body > .toggle-translation {
+    display: block !important;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-height: 44px;
+  }
+
+  .page footer {
+    padding-bottom: 4rem;
+  }
+
+  .page footer .footer-top {
+    justify-content: center;
+  }
+
+  .page footer .toggle-translation {
+    display: none;
   }
 
   .instruction {
@@ -862,9 +919,10 @@ header .credentials {
 
   .notebook-stage {
     width: min(95vw, 100vw);
-    aspect-ratio: 4 / 3;
-    max-height: 60vh;
-    min-height: 300px;
+    aspect-ratio: unset;
+    max-height: none;
+    min-height: unset;
+    height: auto;
     perspective: none;
     margin-top: var(--space-xs);
     margin-bottom: var(--space-lg);
@@ -873,6 +931,8 @@ header .credentials {
   .notebook {
     transform: none !important;
     transform-style: flat;
+    height: auto;
+    min-height: auto;
     box-shadow:
       0 8px 24px rgba(0, 0, 0, 0.15),
       inset 0 0 10px rgba(255, 255, 255, 0.2);
@@ -899,6 +959,11 @@ header .credentials {
     perspective: none;
     transform-style: flat;
     inset: 0;
+    position: relative;
+    height: auto;
+    min-height: auto;
+    padding: 0;
+    border-radius: 16px;
   }
 
   .page {
@@ -913,6 +978,9 @@ header .credentials {
     box-shadow:
       inset 0 0 2px rgba(0, 0, 0, 0.06),
       0 0 0 1px rgba(0, 0, 0, 0.02);
+    height: auto;
+    min-height: auto;
+    width: 100%;
   }
 
   .page::after {
@@ -923,6 +991,7 @@ header .credentials {
     opacity: 1 !important;
     pointer-events: auto;
     z-index: 10;
+    position: relative;
   }
 
   .page.flipped {
@@ -973,8 +1042,10 @@ header .credentials {
   }
 
   .page-content {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: auto;
+    height: auto;
+    min-height: auto;
     gap: var(--space-sm);
   }
 
@@ -984,9 +1055,35 @@ header .credentials {
   }
 
   .toggle-translation {
-    padding: 0.3rem 0.7rem;
-    font-size: 0.8rem;
-    min-height: 40px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-height: 44px;
+  }
+
+  /* Floating translation button on mobile landscape */
+  body > .toggle-translation {
+    display: block !important;
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-height: 44px;
+  }
+
+  .page footer {
+    padding-bottom: 3rem;
+  }
+
+  .page footer .footer-top {
+    justify-content: center;
+  }
+
+  .page footer .toggle-translation {
+    display: none;
   }
 
   .page-navigation {

@@ -212,6 +212,24 @@ function changePage(delta) {
       activeContent.scrollTop = 0;
       updateScrollShadow(activeContent);
     }
+    // Update floating button text on mobile
+    updateFloatingButton();
+    // On mobile, scroll to top of the new poem
+    if (isMobileDevice()) {
+      const activePage = pages[currentPage];
+      if (activePage) {
+        // Use requestAnimationFrame to ensure DOM is updated
+        requestAnimationFrame(() => {
+          const rect = activePage.getBoundingClientRect();
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const targetPosition = rect.top + scrollTop - 20; // 20px offset from top
+          window.scrollTo({
+            top: targetPosition,
+            behavior: "smooth"
+          });
+        });
+      }
+    }
   }
 }
 
@@ -297,19 +315,82 @@ stage.addEventListener(
   { passive: true }
 );
 
+// Global floating button reference for mobile
+let floatingTranslationButton = null;
+
+// Helper function to detect mobile devices (including landscape)
+function isMobileDevice() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  
+  // Portrait mobile: width <= 700px
+  // Landscape mobile: width <= 1000px AND height <= 500px AND touch device
+  return width <= 700 || (width <= 1000 && height <= 500 && isTouchDevice);
+}
+
+function updateFloatingButton() {
+  if (floatingTranslationButton && isMobileDevice()) {
+    const activePage = pages[currentPage];
+    if (activePage) {
+      const isVisible = activePage.classList.contains("translation-visible");
+      floatingTranslationButton.textContent = isVisible ? "Hide translation" : "Show translation";
+    }
+  }
+}
+
 function setupTranslationToggles() {
-  document.querySelectorAll(".toggle-translation").forEach((button) => {
-    button.addEventListener("click", () => {
-      const page = button.closest(".page");
-      const isVisible = page.classList.toggle("translation-visible");
-      button.textContent = isVisible ? "Hide translation" : "Show translation";
-      // Update scroll shadow after translation toggle (content height may change)
-      const pageContent = page.querySelector(".page-content");
-      if (pageContent) {
-        setTimeout(() => updateScrollShadow(pageContent), TRANSLATION_TOGGLE_UPDATE_DELAY);
+  // Check if we're on mobile (including landscape)
+  const isMobile = isMobileDevice();
+  
+  if (isMobile) {
+    // Remove any existing floating button first
+    const existingButton = document.querySelector("body > .toggle-translation");
+    if (existingButton) {
+      existingButton.remove();
+    }
+    
+    // Create a single floating translation button for mobile
+    floatingTranslationButton = document.createElement("button");
+    floatingTranslationButton.className = "toggle-translation";
+    floatingTranslationButton.type = "button";
+    floatingTranslationButton.textContent = "Show translation";
+    floatingTranslationButton.style.display = "block"; // Ensure it's visible
+    document.body.appendChild(floatingTranslationButton);
+    
+    // Toggle translation for the active page
+    floatingTranslationButton.addEventListener("click", () => {
+      const activePage = pages[currentPage];
+      if (activePage) {
+        const isVisible = activePage.classList.toggle("translation-visible");
+        floatingTranslationButton.textContent = isVisible ? "Hide translation" : "Show translation";
       }
     });
-  });
+    
+    // Initial update
+    updateFloatingButton();
+  } else {
+    // Desktop: use buttons in each page footer
+    // Remove floating button if it exists
+    const existingButton = document.querySelector("body > .toggle-translation");
+    if (existingButton) {
+      existingButton.remove();
+      floatingTranslationButton = null;
+    }
+    
+    document.querySelectorAll(".toggle-translation").forEach((button) => {
+      button.addEventListener("click", () => {
+        const page = button.closest(".page");
+        const isVisible = page.classList.toggle("translation-visible");
+        button.textContent = isVisible ? "Hide translation" : "Show translation";
+        // Update scroll shadow after translation toggle (content height may change)
+        const pageContent = page.querySelector(".page-content");
+        if (pageContent) {
+          setTimeout(() => updateScrollShadow(pageContent), TRANSLATION_TOGGLE_UPDATE_DELAY);
+        }
+      });
+    });
+  }
 }
 
 // Load poems from YAML files
@@ -474,6 +555,8 @@ window.addEventListener("resize", () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
     setupScrollShadows();
+    // Recreate translation toggles on resize to handle mobile/desktop switch
+    setupTranslationToggles();
   }, RESIZE_DEBOUNCE_DELAY);
 }, { passive: true });
 
