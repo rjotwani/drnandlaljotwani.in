@@ -309,7 +309,7 @@ function changePage(delta) {
     }
     // Update floating button text on mobile
     updateFloatingButton();
-    // On mobile, scroll to top of the new poem
+    // On mobile, scroll to top of the new poem and re-observe for translation button visibility
     if (isMobileDevice()) {
       const activePage = pages[currentPage];
       if (activePage) {
@@ -322,10 +322,13 @@ function changePage(delta) {
             top: targetPosition,
             behavior: 'smooth'
           });
+          // Re-observe for translation button visibility on the new page
+          observeActivePageForTranslationButton();
         });
-      }
-        // Re-observe for translation button visibility on the new page
+      } else {
+        // Re-observe even if activePage is not found
         observeActivePageForTranslationButton();
+      }
     }
   }
 }
@@ -440,6 +443,17 @@ function observeActivePageForTranslationButton() {
   );
 
   translationVisibilityObserver.observe(poemBody);
+  
+  // Immediately check if the poem body is already visible (IntersectionObserver may not fire if already in view)
+  requestAnimationFrame(() => {
+    const rect = poemBody.getBoundingClientRect();
+    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    if (isVisible) {
+      showFloatingTranslationButton();
+    } else {
+      hideFloatingTranslationButton();
+    }
+  });
 }
 
 function setupTranslationToggles() {
@@ -482,10 +496,8 @@ function setupTranslationToggles() {
     
     // Initial text update
     updateFloatingButton();
-    // Start observing visibility if the notebook is already open
-    if (notebook && notebook.classList.contains('open')) {
-      observeActivePageForTranslationButton();
-    }
+    // On mobile, the notebook is always effectively "open" (cover is hidden)
+    // The observer will be set up after pages are rendered in loadPoems()
   } else {
     // Desktop: use buttons in each page footer
     // Remove floating button if it exists
@@ -590,6 +602,13 @@ async function loadPoems() {
     setupTranslationToggles();
     updatePages();
     setupScrollShadows();
+    
+    // Set up observer for mobile translation button after pages are rendered
+    if (isMobileDevice()) {
+      requestAnimationFrame(() => {
+        observeActivePageForTranslationButton();
+      });
+    }
   } catch (error) {
     console.error('Error loading poems:', error);
     const errorMessage = error instanceof Error ? escapeHtml(error.message) : 'Unknown error';
