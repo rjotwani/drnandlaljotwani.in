@@ -25,14 +25,18 @@
 }
 
 html {
-  background: radial-gradient(circle at top, #fefbf7 0%, #ecdfcf 60%, #ddc8af 100%);
-  /* Background extends into safe areas on iOS - padding handled by body */
+  height: 100%;
+  min-height: 100%;
+  background-color: #ddc8af; /* Fallback color matching gradient end */
+  background-image: radial-gradient(circle at top, #fefbf7 0%, #ecdfcf 60%, #ddc8af 100%);
+  /* Background extends into safe areas and overscroll areas on iOS */
 }
 
 body {
   margin: 0;
   min-height: 100dvh;
-  background: radial-gradient(circle at top, #fefbf7 0%, #ecdfcf 60%, #ddc8af 100%);
+  background-color: #ddc8af; /* Fallback color matching gradient end */
+  background-image: radial-gradient(circle at top, #fefbf7 0%, #ecdfcf 60%, #ddc8af 100%);
   font-family: "Spectral", serif;
   color: var(--ink);
   display: flex;
