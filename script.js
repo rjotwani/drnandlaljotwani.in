@@ -431,28 +431,53 @@ function observeActivePageForTranslationButton() {
         if (entry.isIntersecting) {
           showFloatingTranslationButton();
         } else {
-          hideFloatingTranslationButton();
+          // Before hiding, double-check with getBoundingClientRect to avoid false negatives
+          const rect = poemBody.getBoundingClientRect();
+          const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+          const isActuallyVisible = rect.top < viewportHeight && rect.bottom > 0;
+          
+          // Only hide if it's truly not visible
+          if (!isActuallyVisible) {
+            hideFloatingTranslationButton();
+          }
         }
       });
     },
     {
       root: null,
       // Trigger as soon as the element enters or leaves the viewport
-      threshold: [0]
+      threshold: [0],
+      // Add a small rootMargin to be more forgiving about visibility
+      rootMargin: '0px'
     }
   );
 
   translationVisibilityObserver.observe(poemBody);
   
-  // Immediately check if the poem body is already visible (IntersectionObserver may not fire if already in view)
-  requestAnimationFrame(() => {
+  // Check visibility with multiple timing strategies to handle Safari quirks
+  const checkVisibility = () => {
     const rect = poemBody.getBoundingClientRect();
-    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-    if (isVisible) {
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    // Check if any part of the poem body is visible in the viewport
+    const isVisible = rect.top < viewportHeight && rect.bottom > 0;
+    
+    // Also check if the page itself is in view
+    const pageRect = activePage.getBoundingClientRect();
+    const pageIsVisible = pageRect.top < viewportHeight && pageRect.bottom > 0;
+    
+    // Show button if poem body is visible OR if the page is visible (poem might be just below viewport)
+    if (isVisible || (pageIsVisible && rect.bottom > rect.top)) {
       showFloatingTranslationButton();
     } else {
       hideFloatingTranslationButton();
     }
+  };
+  
+  // Check immediately
+  requestAnimationFrame(() => {
+    checkVisibility();
+    // Check again after a short delay to catch any layout shifts
+    setTimeout(checkVisibility, 100);
   });
 }
 
