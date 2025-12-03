@@ -32,6 +32,8 @@ let cachedWindowWidth = null;
 let cachedWindowHeight = null;
 let cachedTouchSupport = null;
 let translationVisibilityObserver = null;
+let translationButtonVisible = false; // Track current visibility state to prevent unnecessary toggles
+let translationCheckTimeout = null;
 
 // Event handlers for cleanup
 const eventHandlers = {
@@ -309,7 +311,7 @@ function changePage(delta) {
     }
     // Update floating button text on mobile
     updateFloatingButton();
-    // On mobile, scroll to top of the new poem and re-observe for translation button visibility
+    // On mobile, scroll to top of the new poem and update translation button visibility
     if (isMobileDevice()) {
       const activePage = pages[currentPage];
       if (activePage) {
@@ -323,12 +325,12 @@ function changePage(delta) {
             behavior: 'smooth'
           });
         });
-        // Set up observer after a short delay to let the page change settle
+        // Set up visibility tracking after page change settles
         setTimeout(() => {
-          observeActivePageForTranslationButton();
-        }, 100);
+          setupTranslationButtonVisibility();
+        }, 150);
       } else {
-        hideFloatingTranslationButton();
+        setTranslationButtonVisibility(false);
       }
     }
   }
@@ -380,84 +382,114 @@ function updateFloatingButton() {
 }
 
 // Control visibility of the floating translation button on mobile
-function showFloatingTranslationButton() {
-  if (floatingTranslationButton && isMobileDevice()) {
-    floatingTranslationButton.classList.remove('translation-toggle-hidden');
+function setTranslationButtonVisibility(visible) {
+  // Only update if state actually changed to prevent unnecessary DOM updates
+  if (!floatingTranslationButton || !isMobileDevice() || translationButtonVisible === visible) {
+    return;
   }
-}
-
-function hideFloatingTranslationButton() {
-  if (floatingTranslationButton && isMobileDevice()) {
+  
+  translationButtonVisible = visible;
+  
+  if (visible) {
+    floatingTranslationButton.classList.remove('translation-toggle-hidden');
+  } else {
     floatingTranslationButton.classList.add('translation-toggle-hidden');
   }
 }
 
-// Observe the active poem body to decide when to show the floating translation button
-function observeActivePageForTranslationButton() {
-  if (!isMobileDevice() || !floatingTranslationButton) return;
-
-  // Disconnect any existing observer first
-  if (translationVisibilityObserver) {
-    translationVisibilityObserver.disconnect();
-    translationVisibilityObserver = null;
+// Check if the poem body is currently visible in the viewport
+function checkPoemBodyVisibility() {
+  if (!isMobileDevice() || !floatingTranslationButton) {
+    return false;
   }
 
   const activePage = pages[currentPage];
   if (!activePage) {
-    hideFloatingTranslationButton();
+    return false;
+  }
+
+  const poemBody = activePage.querySelector('.poem-body');
+  if (!poemBody) {
+    return false;
+  }
+
+  const rect = poemBody.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  
+  // Check if any part of the poem body is visible
+  return rect.top < viewportHeight && rect.bottom > 0;
+}
+
+// Update translation button visibility based on poem body visibility
+function updateTranslationButtonVisibility() {
+  if (!isMobileDevice() || !floatingTranslationButton) {
+    return;
+  }
+
+  const isVisible = checkPoemBodyVisibility();
+  setTranslationButtonVisibility(isVisible);
+}
+
+// Set up visibility tracking for the translation button
+function setupTranslationButtonVisibility() {
+  if (!isMobileDevice() || !floatingTranslationButton) {
+    return;
+  }
+
+  // Clean up any existing observers/listeners
+  if (translationVisibilityObserver) {
+    translationVisibilityObserver.disconnect();
+    translationVisibilityObserver = null;
+  }
+  
+  if (translationCheckTimeout) {
+    // Could be either timeout or interval, so try both
+    clearTimeout(translationCheckTimeout);
+    clearInterval(translationCheckTimeout);
+    translationCheckTimeout = null;
+  }
+
+  const activePage = pages[currentPage];
+  if (!activePage) {
+    setTranslationButtonVisibility(false);
     return;
   }
 
   const poemBody = activePage.querySelector('.poem-body');
   if (!poemBody) {
-    hideFloatingTranslationButton();
+    setTranslationButtonVisibility(false);
     return;
   }
 
-  // Use IntersectionObserver if available, otherwise use simple scroll-based check
+  // Use IntersectionObserver as primary method
   if ('IntersectionObserver' in window) {
     translationVisibilityObserver = new IntersectionObserver(
       (entries) => {
-        // Only process the entry for the current poem body
-        const entry = entries.find(e => e.target === poemBody);
-        if (!entry) return;
-        
-        // Simple logic: show when intersecting, hide when not
-        if (entry.isIntersecting) {
-          showFloatingTranslationButton();
-        } else {
-          hideFloatingTranslationButton();
+        // Find the entry for our poem body
+        for (const entry of entries) {
+          if (entry.target === poemBody) {
+            setTranslationButtonVisibility(entry.isIntersecting);
+            break;
+          }
         }
       },
       {
         root: null,
-        threshold: 0, // Trigger as soon as any part enters/leaves viewport
-        rootMargin: '20px 0px' // Small margin to be slightly more forgiving
+        threshold: 0,
+        rootMargin: '0px'
       }
     );
 
     translationVisibilityObserver.observe(poemBody);
     
-    // Check initial state immediately (IntersectionObserver may not fire if already in view)
-    requestAnimationFrame(() => {
-      const rect = poemBody.getBoundingClientRect();
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-      const isVisible = rect.top < viewportHeight && rect.bottom > 0;
-      
-      if (isVisible) {
-        showFloatingTranslationButton();
-      } else {
-        hideFloatingTranslationButton();
-      }
-    });
+    // Initial check after a brief delay to ensure DOM is ready
+    translationCheckTimeout = setTimeout(() => {
+      updateTranslationButtonVisibility();
+    }, 50);
   } else {
-    // Fallback: simple check based on notebook being open
-    const notebookElement = notebook;
-    if (notebookElement && notebookElement.classList.contains('open')) {
-      showFloatingTranslationButton();
-    } else {
-      hideFloatingTranslationButton();
-    }
+    // Fallback: periodic check
+    updateTranslationButtonVisibility();
+    translationCheckTimeout = setInterval(updateTranslationButtonVisibility, 200);
   }
 }
 
@@ -505,6 +537,18 @@ function setupTranslationToggles() {
     // The observer will be set up after pages are rendered in loadPoems()
   } else {
     // Desktop: use buttons in each page footer
+    // Clean up mobile-specific visibility tracking
+    if (translationVisibilityObserver) {
+      translationVisibilityObserver.disconnect();
+      translationVisibilityObserver = null;
+    }
+    if (translationCheckTimeout) {
+      clearTimeout(translationCheckTimeout);
+      clearInterval(translationCheckTimeout);
+      translationCheckTimeout = null;
+    }
+    translationButtonVisible = false;
+    
     // Remove floating button if it exists
     const existingButton = document.querySelector('body > .toggle-translation');
     if (existingButton) {
@@ -608,12 +652,11 @@ async function loadPoems() {
     updatePages();
     setupScrollShadows();
     
-    // Set up observer for mobile translation button after pages are rendered
-    // Use a small delay to ensure DOM is fully ready
+    // Set up visibility tracking for mobile translation button after pages are rendered
     if (isMobileDevice()) {
       setTimeout(() => {
-        observeActivePageForTranslationButton();
-      }, 150);
+        setupTranslationButtonVisibility();
+      }, 200);
     }
   } catch (error) {
     console.error('Error loading poems:', error);
