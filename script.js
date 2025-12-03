@@ -313,7 +313,7 @@ function changePage(delta) {
     if (isMobileDevice()) {
       const activePage = pages[currentPage];
       if (activePage) {
-        // Use requestAnimationFrame to ensure DOM is updated
+        // Scroll to the new page
         requestAnimationFrame(() => {
           const rect = activePage.getBoundingClientRect();
           const scrollTop = getScrollTop();
@@ -322,12 +322,13 @@ function changePage(delta) {
             top: targetPosition,
             behavior: 'smooth'
           });
-          // Re-observe for translation button visibility on the new page
-          observeActivePageForTranslationButton();
         });
+        // Set up observer after a short delay to let the page change settle
+        setTimeout(() => {
+          observeActivePageForTranslationButton();
+        }, 100);
       } else {
-        // Re-observe even if activePage is not found
-        observeActivePageForTranslationButton();
+        hideFloatingTranslationButton();
       }
     }
   }
@@ -395,17 +396,7 @@ function hideFloatingTranslationButton() {
 function observeActivePageForTranslationButton() {
   if (!isMobileDevice() || !floatingTranslationButton) return;
 
-  // Fallback: if IntersectionObserver is not supported, just show the button when the notebook is open
-  if (!('IntersectionObserver' in window)) {
-    const notebookElement = notebook;
-    if (notebookElement && notebookElement.classList.contains('open')) {
-      showFloatingTranslationButton();
-    } else {
-      hideFloatingTranslationButton();
-    }
-    return;
-  }
-
+  // Disconnect any existing observer first
   if (translationVisibilityObserver) {
     translationVisibilityObserver.disconnect();
     translationVisibilityObserver = null;
@@ -423,62 +414,51 @@ function observeActivePageForTranslationButton() {
     return;
   }
 
-  translationVisibilityObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.target !== poemBody) return;
-        // Show the button as soon as any part of the poem body is visible
+  // Use IntersectionObserver if available, otherwise use simple scroll-based check
+  if ('IntersectionObserver' in window) {
+    translationVisibilityObserver = new IntersectionObserver(
+      (entries) => {
+        // Only process the entry for the current poem body
+        const entry = entries.find(e => e.target === poemBody);
+        if (!entry) return;
+        
+        // Simple logic: show when intersecting, hide when not
         if (entry.isIntersecting) {
           showFloatingTranslationButton();
         } else {
-          // Before hiding, double-check with getBoundingClientRect to avoid false negatives
-          const rect = poemBody.getBoundingClientRect();
-          const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-          const isActuallyVisible = rect.top < viewportHeight && rect.bottom > 0;
-          
-          // Only hide if it's truly not visible
-          if (!isActuallyVisible) {
-            hideFloatingTranslationButton();
-          }
+          hideFloatingTranslationButton();
         }
-      });
-    },
-    {
-      root: null,
-      // Trigger as soon as the element enters or leaves the viewport
-      threshold: [0],
-      // Add a small rootMargin to be more forgiving about visibility
-      rootMargin: '0px'
-    }
-  );
+      },
+      {
+        root: null,
+        threshold: 0, // Trigger as soon as any part enters/leaves viewport
+        rootMargin: '20px 0px' // Small margin to be slightly more forgiving
+      }
+    );
 
-  translationVisibilityObserver.observe(poemBody);
-  
-  // Check visibility with multiple timing strategies to handle Safari quirks
-  const checkVisibility = () => {
-    const rect = poemBody.getBoundingClientRect();
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-    // Check if any part of the poem body is visible in the viewport
-    const isVisible = rect.top < viewportHeight && rect.bottom > 0;
+    translationVisibilityObserver.observe(poemBody);
     
-    // Also check if the page itself is in view
-    const pageRect = activePage.getBoundingClientRect();
-    const pageIsVisible = pageRect.top < viewportHeight && pageRect.bottom > 0;
-    
-    // Show button if poem body is visible OR if the page is visible (poem might be just below viewport)
-    if (isVisible || (pageIsVisible && rect.bottom > rect.top)) {
+    // Check initial state immediately (IntersectionObserver may not fire if already in view)
+    requestAnimationFrame(() => {
+      const rect = poemBody.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const isVisible = rect.top < viewportHeight && rect.bottom > 0;
+      
+      if (isVisible) {
+        showFloatingTranslationButton();
+      } else {
+        hideFloatingTranslationButton();
+      }
+    });
+  } else {
+    // Fallback: simple check based on notebook being open
+    const notebookElement = notebook;
+    if (notebookElement && notebookElement.classList.contains('open')) {
       showFloatingTranslationButton();
     } else {
       hideFloatingTranslationButton();
     }
-  };
-  
-  // Check immediately
-  requestAnimationFrame(() => {
-    checkVisibility();
-    // Check again after a short delay to catch any layout shifts
-    setTimeout(checkVisibility, 100);
-  });
+  }
 }
 
 function setupTranslationToggles() {
@@ -629,10 +609,11 @@ async function loadPoems() {
     setupScrollShadows();
     
     // Set up observer for mobile translation button after pages are rendered
+    // Use a small delay to ensure DOM is fully ready
     if (isMobileDevice()) {
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         observeActivePageForTranslationButton();
-      });
+      }, 150);
     }
   } catch (error) {
     console.error('Error loading poems:', error);
@@ -677,8 +658,7 @@ function setupNotebookReveal() {
     
     notebook.classList.add('open');
     hideScrollIndicator();
-    // Once the notebook is open, start observing poem visibility for the mobile translation button
-    observeActivePageForTranslationButton();
+    // Observer is set up after pages render, no need to set it up here
     setTimeout(() => {
       notebook.classList.add('label-hidden');
     }, LABEL_HIDE_DELAY);
