@@ -37,7 +37,7 @@ let translationButtonState = {
   isVisible: false,
   rafId: null,
   scrollHandler: null,
-  currentPoemBody: null
+  notebookStage: null
 };
 
 // Event handlers for cleanup
@@ -391,14 +391,14 @@ function updateFloatingButton() {
 // Translation Button Visibility (Mobile Only)
 // ============================================
 
-// Check if poem body element is visible in viewport
-function isPoemBodyInViewport(poemBody) {
-  if (!poemBody) return false;
+// Check if notebook stage (viewer container) is visible in viewport
+function isNotebookStageInViewport(notebookStage) {
+  if (!notebookStage) return false;
   
-  const rect = poemBody.getBoundingClientRect();
+  const rect = notebookStage.getBoundingClientRect();
   const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
   
-  // Element is visible if any part is in the viewport
+  // Notebook is visible if any part is in the viewport
   return rect.bottom > 0 && rect.top < viewportHeight;
 }
 
@@ -423,8 +423,8 @@ function checkAndUpdateVisibility() {
     return;
   }
   
-  const poemBody = translationButtonState.currentPoemBody;
-  const isVisible = isPoemBodyInViewport(poemBody);
+  const notebookStage = translationButtonState.notebookStage;
+  const isVisible = isNotebookStageInViewport(notebookStage);
   updateButtonVisibilityState(isVisible);
   
   // Continue checking while active
@@ -433,7 +433,7 @@ function checkAndUpdateVisibility() {
   }
 }
 
-// Start visibility tracking for current page
+// Start visibility tracking for notebook viewer
 function startTranslationButtonTracking() {
   // Only on mobile with button present
   if (!isMobileDevice() || !floatingTranslationButton) {
@@ -443,21 +443,15 @@ function startTranslationButtonTracking() {
   // Stop any existing tracking
   stopTranslationButtonTracking();
   
-  // Get current page's poem body
-  const activePage = pages[currentPage];
-  if (!activePage) {
-    updateButtonVisibilityState(false);
-    return;
-  }
-  
-  const poemBody = activePage.querySelector('.poem-body');
-  if (!poemBody) {
+  // Get notebook stage element (the container for all pages)
+  const notebookStage = document.querySelector('.notebook-stage');
+  if (!notebookStage) {
     updateButtonVisibilityState(false);
     return;
   }
   
   // Store reference and start tracking
-  translationButtonState.currentPoemBody = poemBody;
+  translationButtonState.notebookStage = notebookStage;
   translationButtonState.isActive = true;
   
   // Set up scroll listener to trigger RAF loop
@@ -488,7 +482,7 @@ function stopTranslationButtonTracking() {
     translationButtonState.scrollHandler = null;
   }
   
-  translationButtonState.currentPoemBody = null;
+  translationButtonState.notebookStage = null;
 }
 
 function setupTranslationToggles() {
