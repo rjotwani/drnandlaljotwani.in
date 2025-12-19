@@ -426,11 +426,27 @@ function isPoemBodyVisible() {
     return false;
   }
 
-  const rect = poemBody.getBoundingClientRect();
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  // Use visualViewport API if available (more reliable on iOS Safari)
+  // Falls back to window.innerHeight with a buffer for iOS Safari's dynamic toolbar
+  const viewportHeight = window.visualViewport 
+    ? window.visualViewport.height 
+    : (window.innerHeight || document.documentElement.clientHeight);
   
-  // Check if any part of the poem body is visible
-  return rect.top < viewportHeight && rect.bottom > 0;
+  // Add a buffer (100px) to account for scroll momentum and iOS Safari viewport quirks
+  // This prevents the button from disappearing prematurely during scroll
+  const buffer = 100;
+  
+  // Check poem body visibility
+  const bodyRect = poemBody.getBoundingClientRect();
+  const isBodyVisible = bodyRect.bottom > -buffer && bodyRect.top < viewportHeight + buffer;
+  
+  // Also check if the page itself is visible (more lenient check for iOS Safari)
+  // This ensures the button stays visible even if there are minor calculation issues
+  const pageRect = activePage.getBoundingClientRect();
+  const isPageVisible = pageRect.bottom > 0 && pageRect.top < viewportHeight + buffer;
+  
+  // Show button if either the poem body or the page is visible
+  return isBodyVisible || isPageVisible;
 }
 
 // Check visibility and update button (runs in RAF loop)
@@ -476,14 +492,22 @@ function startTranslationButtonTracking() {
   translationButtonState.isTracking = true;
 
   // Set up scroll handler to ensure RAF loop runs during scroll
+  // On iOS Safari, we need to continuously check during scroll momentum
   translationButtonState.scrollHandler = () => {
-    // If RAF loop isn't running, start it
-    if (!translationButtonState.rafId) {
+    // Always schedule a check during scroll - this ensures we catch all scroll events
+    // including momentum scrolling on iOS Safari
+    if (translationButtonState.isTracking) {
+      if (translationButtonState.rafId) {
+        cancelAnimationFrame(translationButtonState.rafId);
+      }
       translationButtonState.rafId = requestAnimationFrame(checkAndUpdateTranslationButton);
     }
   };
 
   window.addEventListener('scroll', translationButtonState.scrollHandler, { passive: true });
+  
+  // Also listen to touchmove for iOS Safari momentum scrolling
+  window.addEventListener('touchmove', translationButtonState.scrollHandler, { passive: true });
   
   // Start initial check
   translationButtonState.rafId = requestAnimationFrame(checkAndUpdateTranslationButton);
@@ -500,6 +524,7 @@ function stopTranslationButtonTracking() {
 
   if (translationButtonState.scrollHandler) {
     window.removeEventListener('scroll', translationButtonState.scrollHandler, { passive: true });
+    window.removeEventListener('touchmove', translationButtonState.scrollHandler, { passive: true });
     translationButtonState.scrollHandler = null;
   }
 }
