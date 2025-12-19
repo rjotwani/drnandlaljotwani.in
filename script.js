@@ -33,11 +33,10 @@ let cachedWindowHeight = null;
 let cachedTouchSupport = null;
 // Translation button visibility state (mobile only)
 let translationButtonState = {
-  isActive: false,
-  isVisible: false,
+  isTracking: false,
+  currentVisibility: false,
   rafId: null,
-  scrollHandler: null,
-  notebookStage: null
+  scrollHandler: null
 };
 
 // Event handlers for cleanup
@@ -336,7 +335,7 @@ function changePage(delta) {
         }, 100);
       } else {
         stopTranslationButtonTracking();
-        updateButtonVisibilityState(false);
+        updateTranslationButtonDOM(false);
       }
     }
   }
@@ -391,98 +390,118 @@ function updateFloatingButton() {
 // Translation Button Visibility (Mobile Only)
 // ============================================
 
-// Check if notebook stage (viewer container) is visible in viewport
-function isNotebookStageInViewport(notebookStage) {
-  if (!notebookStage) return false;
-  
-  const rect = notebookStage.getBoundingClientRect();
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-  
-  // Notebook is visible if any part is in the viewport
-  return rect.bottom > 0 && rect.top < viewportHeight;
-}
-
-// Update button visibility state (only updates DOM if state changed)
-function updateButtonVisibilityState(shouldBeVisible) {
-  if (!floatingTranslationButton || translationButtonState.isVisible === shouldBeVisible) {
+// Update button visibility in DOM (only if state changed)
+function updateTranslationButtonDOM(visible) {
+  if (!floatingTranslationButton || !isMobileDevice()) {
     return;
   }
   
-  translationButtonState.isVisible = shouldBeVisible;
+  // Only update DOM if visibility state actually changed
+  if (translationButtonState.currentVisibility === visible) {
+    return;
+  }
   
-  if (shouldBeVisible) {
+  translationButtonState.currentVisibility = visible;
+  
+  if (visible) {
     floatingTranslationButton.classList.remove('translation-toggle-hidden');
   } else {
     floatingTranslationButton.classList.add('translation-toggle-hidden');
   }
 }
 
-// Check visibility and update button (called during scroll via RAF)
-function checkAndUpdateVisibility() {
-  if (!translationButtonState.isActive || !floatingTranslationButton) {
+// Check if poem body is visible in viewport
+function isPoemBodyVisible() {
+  if (!isMobileDevice() || !floatingTranslationButton) {
+    return false;
+  }
+
+  const activePage = pages[currentPage];
+  if (!activePage) {
+    return false;
+  }
+
+  const poemBody = activePage.querySelector('.poem-body');
+  if (!poemBody) {
+    return false;
+  }
+
+  const rect = poemBody.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  
+  // Check if any part of the poem body is visible
+  return rect.top < viewportHeight && rect.bottom > 0;
+}
+
+// Check visibility and update button (runs in RAF loop)
+function checkAndUpdateTranslationButton() {
+  if (!translationButtonState.isTracking || !isMobileDevice() || !floatingTranslationButton) {
+    translationButtonState.rafId = null;
     return;
   }
+
+  const isVisible = isPoemBodyVisible();
+  updateTranslationButtonDOM(isVisible);
   
-  const notebookStage = translationButtonState.notebookStage;
-  const isVisible = isNotebookStageInViewport(notebookStage);
-  updateButtonVisibilityState(isVisible);
-  
-  // Continue checking while active
-  if (translationButtonState.isActive) {
-    translationButtonState.rafId = requestAnimationFrame(checkAndUpdateVisibility);
+  // Continue RAF loop while tracking
+  if (translationButtonState.isTracking) {
+    translationButtonState.rafId = requestAnimationFrame(checkAndUpdateTranslationButton);
+  } else {
+    translationButtonState.rafId = null;
   }
 }
 
-// Start visibility tracking for notebook viewer
+// Start visibility tracking
 function startTranslationButtonTracking() {
-  // Only on mobile with button present
   if (!isMobileDevice() || !floatingTranslationButton) {
     return;
   }
-  
-  // Stop any existing tracking
+
+  // Stop any existing tracking first
   stopTranslationButtonTracking();
-  
-  // Get notebook stage element (the container for all pages)
-  const notebookStage = document.querySelector('.notebook-stage');
-  if (!notebookStage) {
-    updateButtonVisibilityState(false);
+
+  const activePage = pages[currentPage];
+  if (!activePage) {
+    updateTranslationButtonDOM(false);
     return;
   }
-  
-  // Store reference and start tracking
-  translationButtonState.notebookStage = notebookStage;
-  translationButtonState.isActive = true;
-  
-  // Set up scroll listener to trigger RAF loop
+
+  const poemBody = activePage.querySelector('.poem-body');
+  if (!poemBody) {
+    updateTranslationButtonDOM(false);
+    return;
+  }
+
+  // Mark as tracking
+  translationButtonState.isTracking = true;
+
+  // Set up scroll handler to ensure RAF loop runs during scroll
   translationButtonState.scrollHandler = () => {
+    // If RAF loop isn't running, start it
     if (!translationButtonState.rafId) {
-      // Start RAF loop if not already running
-      translationButtonState.rafId = requestAnimationFrame(checkAndUpdateVisibility);
+      translationButtonState.rafId = requestAnimationFrame(checkAndUpdateTranslationButton);
     }
   };
-  
+
   window.addEventListener('scroll', translationButtonState.scrollHandler, { passive: true });
   
-  // Initial check
-  checkAndUpdateVisibility();
+  // Start initial check
+  translationButtonState.rafId = requestAnimationFrame(checkAndUpdateTranslationButton);
 }
 
-// Stop visibility tracking and clean up
+// Stop visibility tracking
 function stopTranslationButtonTracking() {
-  translationButtonState.isActive = false;
-  
+  translationButtonState.isTracking = false;
+
   if (translationButtonState.rafId) {
     cancelAnimationFrame(translationButtonState.rafId);
     translationButtonState.rafId = null;
   }
-  
+
   if (translationButtonState.scrollHandler) {
     window.removeEventListener('scroll', translationButtonState.scrollHandler, { passive: true });
     translationButtonState.scrollHandler = null;
   }
-  
-  translationButtonState.notebookStage = null;
 }
 
 function setupTranslationToggles() {
