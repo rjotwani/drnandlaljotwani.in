@@ -917,13 +917,6 @@ body > .toggle-translation {
     font-size: 0.85rem;
     padding: 0 var(--space-md);
   }
-
-  /* Hidden state for the floating translation button on mobile */
-  body > .toggle-translation.translation-toggle-hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(12px);
-  }
 }
 
 /* ============================================

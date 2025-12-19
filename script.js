@@ -31,13 +31,6 @@ let isMobileDeviceCache = null;
 let cachedWindowWidth = null;
 let cachedWindowHeight = null;
 let cachedTouchSupport = null;
-// Translation button visibility state (mobile only)
-let translationButtonState = {
-  isTracking: false,
-  currentVisibility: false,
-  rafId: null,
-  scrollHandler: null
-};
 
 // Event handlers for cleanup
 const eventHandlers = {
@@ -315,7 +308,7 @@ function changePage(delta) {
     }
     // Update floating button text on mobile
     updateFloatingButton();
-    // On mobile, scroll to top of the new poem and restart visibility tracking
+    // On mobile, scroll to top of the new poem
     if (isMobileDevice()) {
       const activePage = pages[currentPage];
       if (activePage) {
@@ -329,13 +322,6 @@ function changePage(delta) {
             behavior: 'smooth'
           });
         });
-        // Restart tracking after a brief delay to let page change settle
-        setTimeout(() => {
-          startTranslationButtonTracking();
-        }, 100);
-      } else {
-        stopTranslationButtonTracking();
-        updateTranslationButtonDOM(false);
       }
     }
   }
@@ -386,123 +372,6 @@ function updateFloatingButton() {
   }
 }
 
-// ============================================
-// Translation Button Visibility (Mobile Only)
-// ============================================
-
-// Update button visibility in DOM (only if state changed)
-function updateTranslationButtonDOM(visible) {
-  if (!floatingTranslationButton || !isMobileDevice()) {
-    return;
-  }
-  
-  // Only update DOM if visibility state actually changed
-  if (translationButtonState.currentVisibility === visible) {
-    return;
-  }
-  
-  translationButtonState.currentVisibility = visible;
-  
-  if (visible) {
-    floatingTranslationButton.classList.remove('translation-toggle-hidden');
-  } else {
-    floatingTranslationButton.classList.add('translation-toggle-hidden');
-  }
-}
-
-// Check if poem body is visible in viewport
-function isPoemBodyVisible() {
-  if (!isMobileDevice() || !floatingTranslationButton) {
-    return false;
-  }
-
-  const activePage = pages[currentPage];
-  if (!activePage) {
-    return false;
-  }
-
-  const poemBody = activePage.querySelector('.poem-body');
-  if (!poemBody) {
-    return false;
-  }
-
-  const rect = poemBody.getBoundingClientRect();
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-  
-  // Check if any part of the poem body is visible
-  return rect.top < viewportHeight && rect.bottom > 0;
-}
-
-// Check visibility and update button (runs in RAF loop)
-function checkAndUpdateTranslationButton() {
-  if (!translationButtonState.isTracking || !isMobileDevice() || !floatingTranslationButton) {
-    translationButtonState.rafId = null;
-    return;
-  }
-
-  const isVisible = isPoemBodyVisible();
-  updateTranslationButtonDOM(isVisible);
-  
-  // Continue RAF loop while tracking
-  if (translationButtonState.isTracking) {
-    translationButtonState.rafId = requestAnimationFrame(checkAndUpdateTranslationButton);
-  } else {
-    translationButtonState.rafId = null;
-  }
-}
-
-// Start visibility tracking
-function startTranslationButtonTracking() {
-  if (!isMobileDevice() || !floatingTranslationButton) {
-    return;
-  }
-
-  // Stop any existing tracking first
-  stopTranslationButtonTracking();
-
-  const activePage = pages[currentPage];
-  if (!activePage) {
-    updateTranslationButtonDOM(false);
-    return;
-  }
-
-  const poemBody = activePage.querySelector('.poem-body');
-  if (!poemBody) {
-    updateTranslationButtonDOM(false);
-    return;
-  }
-
-  // Mark as tracking
-  translationButtonState.isTracking = true;
-
-  // Set up scroll handler to ensure RAF loop runs during scroll
-  translationButtonState.scrollHandler = () => {
-    // If RAF loop isn't running, start it
-    if (!translationButtonState.rafId) {
-      translationButtonState.rafId = requestAnimationFrame(checkAndUpdateTranslationButton);
-    }
-  };
-
-  window.addEventListener('scroll', translationButtonState.scrollHandler, { passive: true });
-  
-  // Start initial check
-  translationButtonState.rafId = requestAnimationFrame(checkAndUpdateTranslationButton);
-}
-
-// Stop visibility tracking
-function stopTranslationButtonTracking() {
-  translationButtonState.isTracking = false;
-
-  if (translationButtonState.rafId) {
-    cancelAnimationFrame(translationButtonState.rafId);
-    translationButtonState.rafId = null;
-  }
-
-  if (translationButtonState.scrollHandler) {
-    window.removeEventListener('scroll', translationButtonState.scrollHandler, { passive: true });
-    translationButtonState.scrollHandler = null;
-  }
-}
 
 function setupTranslationToggles() {
   // Invalidate cache since device type might have changed
@@ -522,9 +391,9 @@ function setupTranslationToggles() {
       eventHandlers.floatingButton = null;
     }
     
-    // Create a single floating translation button for mobile
+    // Create a single floating translation button for mobile (always visible)
     floatingTranslationButton = document.createElement('button');
-    floatingTranslationButton.className = 'toggle-translation translation-toggle-hidden';
+    floatingTranslationButton.className = 'toggle-translation';
     floatingTranslationButton.type = 'button';
     floatingTranslationButton.textContent = 'Show translation';
     floatingTranslationButton.setAttribute('aria-label', 'Toggle translation visibility');
@@ -544,12 +413,8 @@ function setupTranslationToggles() {
     
     // Initial text update
     updateFloatingButton();
-    // Visibility tracking will be started after pages are rendered in loadPoems()
   } else {
     // Desktop: use buttons in each page footer
-    // Stop mobile visibility tracking
-    stopTranslationButtonTracking();
-    
     // Remove floating button if it exists
     const existingButton = document.querySelector('body > .toggle-translation');
     if (existingButton) {
@@ -652,16 +517,6 @@ async function loadPoems() {
     setupTranslationToggles();
     updatePages();
     setupScrollShadows();
-    
-    // Start visibility tracking for mobile translation button after pages are rendered
-    if (isMobileDevice()) {
-      // Wait for DOM to be fully ready
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          startTranslationButtonTracking();
-        });
-      });
-    }
   } catch (error) {
     console.error('Error loading poems:', error);
     const errorMessage = error instanceof Error ? escapeHtml(error.message) : 'Unknown error';
