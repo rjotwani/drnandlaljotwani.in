@@ -494,16 +494,9 @@ header .credentials {
 }
 
 .poem-body {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: clamp(1rem, 3vw, 2.5rem);
-  align-items: start;
-}
-
-.page.translation-visible .poem-body {
-  align-items: start;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(1.5rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 4vw, 3.5rem);
   max-width: 100%;
 }
 
@@ -511,79 +504,71 @@ header .credentials {
   margin-left: clamp(2rem, 6vw, 4rem);
 }
 
-/* Stanza grid for aligned display */
-.stanza-grid {
-  display: none;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(1rem, 2.5vw, 2rem);
-  width: 100%;
-}
-
-.page.translation-visible .stanza-grid {
-  display: grid;
-  grid-column: 1 / -1;
-  width: 100%;
-}
-
-.page.translation-visible .poem-body > .original {
-  display: none;
-}
-
-.stanza-row {
-  display: contents;
-}
-
-.stanza-cell {
-  padding: 0;
-  margin: 0;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-}
-
-.stanza-cell.original {
-  font-family: "Aref Ruqaa Ink", "Lateef", serif;
-  font-size: clamp(0.75rem, 1.5vw, 1rem);
-  line-height: 1.5;
-  text-align: right;
-}
-
-.stanza-cell.original br {
-  line-height: 0.7;
-  margin-bottom: 0.4em;
-  height: 0.7em;
-  display: block;
-}
-
-.stanza-cell.translation {
-  font-style: italic;
-  color: var(--text-secondary);
-  font-size: clamp(0.75rem, 1.5vw, 1rem);
-  line-height: 1.5;
-  text-align: left;
-}
-
-.stanza-cell.translation br {
-  line-height: 0.7;
-  margin-bottom: 0.4em;
-  height: 0.7em;
-  display: block;
-}
-
-.original {
+/* Original poem at the top */
+.poem-original {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
   font-size: clamp(1.15rem, 2.5vw, 1.9rem);
   line-height: 1.8;
   text-align: left;
   padding: 0;
-  margin: 0;
+  margin-left: clamp(2rem, 6vw, 4rem);
 }
 
-.original br {
+.poem-original br {
   line-height: 0.4;
   display: block;
   margin-bottom: 0.2em;
 }
+
+/* Translation section with two columns (phonetic left, translation right) */
+.poem-translation-section {
+  width: 100%;
+}
+
+/* Stanza grid for aligned phonetic and translation */
+.translation-stanza-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(1rem, 2.5vw, 2rem);
+  width: 100%;
+}
+
+.translation-stanza-row {
+  display: contents;
+}
+
+.translation-column {
+  padding: 0;
+  margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+  line-height: 1.6;
+}
+
+.translation-column.phonetic {
+  font-style: italic;
+  text-align: right;
+  color: var(--text-secondary);
+}
+
+.translation-column.translation {
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.translation-column.translation.full-width {
+  grid-column: 1 / -1;
+}
+
+.translation-column br {
+  line-height: 0.7;
+  margin-bottom: 0.4em;
+  height: 0.7em;
+  display: block;
+}
+
 
 /* ============================================
    Page Footer
@@ -839,25 +824,22 @@ body > .toggle-translation {
     margin-left: 0 !important;
   }
 
-  .page.translation-visible .poem-body {
-    grid-template-columns: 1fr 1fr !important;
+  .poem-body {
+    gap: var(--space-lg);
+  }
+
+  .poem-original {
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    line-height: 1.7;
+  }
+
+  .translation-stanza-grid {
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-md);
   }
 
-  .page.translation-visible .stanza-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: var(--space-sm);
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
-  }
-
-  .stanza-cell.original {
-    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
-    line-height: 1.5;
-  }
-
-  .stanza-cell.translation {
-    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  .translation-column {
+    font-size: clamp(1rem, 3vw, 1.3rem);
     line-height: 1.5;
   }
 
@@ -1066,36 +1048,22 @@ body > .toggle-translation {
   }
 
   .poem-body {
-    grid-template-columns: 1fr !important;
-    margin-left: 0 !important;
-    gap: var(--space-sm);
+    gap: var(--space-md);
   }
 
-  .page.translation-visible .poem-body {
-    grid-template-columns: 1fr 1fr !important;
-    gap: var(--space-sm);
-  }
-
-  .page.translation-visible .stanza-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: var(--space-xs);
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
-  }
-
-  .original {
-    font-size: clamp(0.9rem, 2vw, 1.2rem);
+  .poem-original {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
     line-height: 1.6;
   }
 
-  .stanza-cell.original {
-    font-size: clamp(0.8rem, 2vw, 1rem);
-    line-height: 1.4;
+  .translation-stanza-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
   }
 
-  .stanza-cell.translation {
-    font-size: clamp(0.8rem, 2vw, 1rem);
-    line-height: 1.4;
+  .translation-column {
+    font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+    line-height: 1.5;
   }
 
   .page-content {

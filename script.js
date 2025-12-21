@@ -6,7 +6,6 @@ const LABEL_HIDE_DELAY = 300;
 const INTERSECTION_THRESHOLD = 0.7;
 const SCROLL_TRIGGER_RATIO = 0.5;
 const RESIZE_DEBOUNCE_DELAY = 150;
-const TRANSLATION_TOGGLE_UPDATE_DELAY = 100;
 const SCROLL_INDICATOR_HIDE_THRESHOLD = 100;
 const MOBILE_WIDTH_THRESHOLD = 700;
 const MOBILE_LANDSCAPE_WIDTH_THRESHOLD = 1000;
@@ -190,55 +189,65 @@ function renderPoems() {
     const poemBody = document.createElement('div');
     poemBody.className = 'poem-body';
 
-    // Split both texts into stanzas
-    const originalStanzas = splitIntoStanzas(poem.original);
-    const translationStanzas = splitIntoStanzas(poem.translation);
+    // Original poem at the top (full text)
+    const originalSection = document.createElement('div');
+    originalSection.className = 'poem-original';
+    originalSection.innerHTML = formatText(poem.original);
+    poemBody.appendChild(originalSection);
     
-    // Determine the maximum number of stanzas to ensure we have matching pairs
-    const maxStanzas = Math.max(originalStanzas.length, translationStanzas.length);
+    // Phonetic and translation section below (two columns, stanza-aligned)
+    const translationSection = document.createElement('div');
+    translationSection.className = 'poem-translation-section';
     
-    // Create a grid container for stanza pairs
-    const stanzaGrid = document.createElement('div');
-    stanzaGrid.className = 'stanza-grid';
+    const hasPhonetic = poem.phonetic && typeof poem.phonetic === 'string' && poem.phonetic.trim();
     
-    // Create rows for each stanza pair
-    for (let i = 0; i < maxStanzas; i++) {
-      const stanzaRow = document.createElement('div');
-      stanzaRow.className = 'stanza-row';
+    if (hasPhonetic) {
+      // Split phonetic and translation into stanzas for alignment
+      const phoneticStanzas = splitIntoStanzas(poem.phonetic);
+      const translationStanzas = splitIntoStanzas(poem.translation);
+      const maxStanzas = Math.max(phoneticStanzas.length, translationStanzas.length);
       
-      // Original stanza cell
-      const originalCell = document.createElement('div');
-      originalCell.className = 'stanza-cell original';
-      if (i < originalStanzas.length) {
-        originalCell.innerHTML = formatStanza(originalStanzas[i]);
-      } else {
-        // Add empty cell if original has fewer stanzas
-        originalCell.innerHTML = '&nbsp;';
+      // Create stanza grid for aligned display
+      const stanzaGrid = document.createElement('div');
+      stanzaGrid.className = 'translation-stanza-grid';
+      
+      for (let i = 0; i < maxStanzas; i++) {
+        const stanzaRow = document.createElement('div');
+        stanzaRow.className = 'translation-stanza-row';
+        
+        // Phonetic stanza cell (left)
+        const phoneticCell = document.createElement('div');
+        phoneticCell.className = 'translation-column phonetic';
+        if (i < phoneticStanzas.length) {
+          phoneticCell.innerHTML = formatStanza(phoneticStanzas[i]);
+        } else {
+          phoneticCell.innerHTML = '&nbsp;';
+        }
+        stanzaRow.appendChild(phoneticCell);
+        
+        // Translation stanza cell (right)
+        const translationCell = document.createElement('div');
+        translationCell.className = 'translation-column translation';
+        if (i < translationStanzas.length) {
+          translationCell.innerHTML = formatStanza(translationStanzas[i]);
+        } else {
+          translationCell.innerHTML = '&nbsp;';
+        }
+        stanzaRow.appendChild(translationCell);
+        
+        stanzaGrid.appendChild(stanzaRow);
       }
-      stanzaRow.appendChild(originalCell);
       
-      // Translation stanza cell
-      const translationCell = document.createElement('div');
-      translationCell.className = 'stanza-cell translation';
-      if (i < translationStanzas.length) {
-        translationCell.innerHTML = formatStanza(translationStanzas[i]);
-      } else {
-        // Add empty cell if translation has fewer stanzas
-        translationCell.innerHTML = '&nbsp;';
-      }
-      stanzaRow.appendChild(translationCell);
-      
-      stanzaGrid.appendChild(stanzaRow);
+      translationSection.appendChild(stanzaGrid);
+    } else {
+      // No phonetic - just show translation in full width
+      const translationColumn = document.createElement('div');
+      translationColumn.className = 'translation-column translation full-width';
+      translationColumn.innerHTML = formatText(poem.translation);
+      translationSection.appendChild(translationColumn);
     }
     
-    // For non-translation-visible state, show only original
-    const original = document.createElement('p');
-    original.className = 'original';
-    original.innerHTML = formatText(poem.original);
-    poemBody.appendChild(original);
-    
-    // Add the grid (hidden by default, shown when translation is visible)
-    poemBody.appendChild(stanzaGrid);
+    poemBody.appendChild(translationSection);
 
     pageContent.appendChild(header);
     pageContent.appendChild(poemBody);
