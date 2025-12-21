@@ -511,6 +511,11 @@ header .credentials {
   margin-left: clamp(2rem, 6vw, 4rem);
 }
 
+/* Remove margin when using three-part display (phonetic data exists) */
+.page:not(.translation-visible) .poem-body:has(.poem-line-container) {
+  margin-left: 0;
+}
+
 /* Stanza grid for aligned display */
 .stanza-grid {
   display: none;
@@ -523,6 +528,11 @@ header .credentials {
   display: grid;
   grid-column: 1 / -1;
   width: 100%;
+}
+
+/* Hide stanza-grid when using three-part display (phonetic data exists) */
+.poem-body:has(.poem-line-container) .stanza-grid {
+  display: none !important;
 }
 
 .page.translation-visible .poem-body > .original {
@@ -583,6 +593,57 @@ header .credentials {
   line-height: 0.4;
   display: block;
   margin-bottom: 0.2em;
+}
+
+/* Three-part poem display (Sindhi, Romanization, English) */
+.poem-line-container {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  display: block;
+}
+
+.page.translation-visible .poem-line-container {
+  display: block; /* Always show when phonetic data exists */
+}
+
+.poem-line-group {
+  margin-bottom: clamp(0.5rem, 1.2vw, 0.9rem);
+}
+
+.poem-line {
+  padding: 0;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.poem-line.sindhi {
+  font-family: "Aref Ruqaa Ink", "Lateef", serif;
+  font-size: clamp(1rem, 2.2vw, 1.7rem);
+  text-align: left;
+  /* margin-bottom: 0.05em; */
+}
+
+.poem-line.phonetic {
+  font-style: italic;
+  font-size: clamp(1rem, 2.2vw, 1.7rem);
+  color: var(--text-secondary, rgba(90, 70, 60, 0.75));
+  /* margin-bottom: 0.05em; */
+  /* padding-left: 0.2em; */
+}
+
+.poem-line.translation {
+  font-size: clamp(1rem, 2.2vw, 1.7rem);
+  color: var(--text-secondary, rgba(90, 70, 60, 0.85));
+  margin-bottom: 1em;
+  /* padding-left: 0.4em; */
+  line-height: 1.5;
+}
+
+.stanza-break {
+  height: clamp(1.5rem, 4vw, 2.5rem);
+  margin: 0;
+  padding: 0;
 }
 
 /* ============================================
@@ -851,6 +912,23 @@ body > .toggle-translation {
     width: 100% !important;
   }
 
+  .poem-line.sindhi {
+    font-size: clamp(0.85rem, 2.2vw, 1.05rem);
+    line-height: 1.5;
+  }
+
+  .poem-line.phonetic {
+    font-size: clamp(0.85rem, 2.2vw, 1.05rem);
+  }
+
+  .poem-line.translation {
+    font-size: clamp(0.85rem, 2.2vw, 1.05rem);
+  }
+
+  .stanza-break {
+    height: clamp(1.2rem, 3vw, 2rem);
+  }
+
   .stanza-cell.original {
     font-size: clamp(0.95rem, 2.5vw, 1.15rem);
     line-height: 1.5;
@@ -1086,6 +1164,23 @@ body > .toggle-translation {
   .original {
     font-size: clamp(0.9rem, 2vw, 1.2rem);
     line-height: 1.6;
+  }
+
+  .poem-line.sindhi {
+    font-size: clamp(0.8rem, 1.8vw, 1.1rem);
+    line-height: 1.6;
+  }
+
+  .poem-line.phonetic {
+    font-size: clamp(0.8rem, 1.8vw, 1.1rem);
+  }
+
+  .poem-line.translation {
+    font-size: clamp(0.8rem, 1.8vw, 1.1rem);
+  }
+
+  .stanza-break {
+    height: clamp(1rem, 2.5vw, 1.5rem);
   }
 
   .stanza-cell.original {

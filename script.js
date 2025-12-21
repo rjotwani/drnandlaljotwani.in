@@ -82,6 +82,80 @@ function formatStanza(stanza) {
   return lines.map(line => escapeHtml(line)).join('<br />');
 }
 
+// Split text into lines, preserving empty lines to maintain stanza structure
+function splitIntoLines(text) {
+  if (typeof text !== 'string') return [];
+  
+  const normalized = normalizeLineEndings(text);
+  return normalized.split('\n').map(line => line.trimEnd());
+}
+
+// Render poem with Sindhi, Romanization, and English together
+function renderPoemWithPhonetic(poem) {
+  const container = document.createElement('div');
+  container.className = 'poem-line-container';
+  
+  // Split all three versions into lines
+  const originalLines = splitIntoLines(poem.original || '');
+  const phoneticLines = splitIntoLines(poem.phonetic || '');
+  const translationLines = splitIntoLines(poem.translation || '');
+  
+  // Determine the maximum number of lines
+  const maxLines = Math.max(originalLines.length, phoneticLines.length, translationLines.length);
+  
+  // Group lines by stanza (empty lines indicate stanza breaks)
+  for (let i = 0; i < maxLines; i++) {
+    const originalLine = i < originalLines.length ? originalLines[i] : '';
+    const phoneticLine = i < phoneticLines.length ? phoneticLines[i] : '';
+    const translationLine = i < translationLines.length ? translationLines[i] : '';
+    
+    // Check if this is an empty line (stanza break)
+    // Consider it a stanza break if all present lines are empty
+    const allEmpty = (!originalLine || originalLine === '') &&
+                     (!phoneticLine || phoneticLine === '') &&
+                     (!translationLine || translationLine === '');
+    
+    if (allEmpty) {
+      const stanzaBreak = document.createElement('div');
+      stanzaBreak.className = 'stanza-break';
+      container.appendChild(stanzaBreak);
+      continue;
+    }
+    
+    // Create a line group
+    const lineGroup = document.createElement('div');
+    lineGroup.className = 'poem-line-group';
+    
+    // Sindhi script line
+    if (originalLine) {
+      const sindhiLine = document.createElement('div');
+      sindhiLine.className = 'poem-line sindhi';
+      sindhiLine.textContent = originalLine;
+      lineGroup.appendChild(sindhiLine);
+    }
+    
+    // Romanization line (italic)
+    if (phoneticLine) {
+      const phoneticLineEl = document.createElement('div');
+      phoneticLineEl.className = 'poem-line phonetic';
+      phoneticLineEl.textContent = phoneticLine;
+      lineGroup.appendChild(phoneticLineEl);
+    }
+    
+    // English translation line (underneath)
+    if (translationLine) {
+      const translationLineEl = document.createElement('div');
+      translationLineEl.className = 'poem-line translation';
+      translationLineEl.textContent = translationLine;
+      lineGroup.appendChild(translationLineEl);
+    }
+    
+    container.appendChild(lineGroup);
+  }
+  
+  return container;
+}
+
 // Convert newlines to <br /> tags, preserving paragraph breaks (for non-grid layout)
 function formatText(text) {
   if (typeof text !== 'string') return '';
@@ -190,55 +264,72 @@ function renderPoems() {
     const poemBody = document.createElement('div');
     poemBody.className = 'poem-body';
 
-    // Split both texts into stanzas
-    const originalStanzas = splitIntoStanzas(poem.original);
-    const translationStanzas = splitIntoStanzas(poem.translation);
-    
-    // Determine the maximum number of stanzas to ensure we have matching pairs
-    const maxStanzas = Math.max(originalStanzas.length, translationStanzas.length);
-    
-    // Create a grid container for stanza pairs
-    const stanzaGrid = document.createElement('div');
-    stanzaGrid.className = 'stanza-grid';
-    
-    // Create rows for each stanza pair
-    for (let i = 0; i < maxStanzas; i++) {
-      const stanzaRow = document.createElement('div');
-      stanzaRow.className = 'stanza-row';
+    // Check if this poem has phonetic data - if so, use new three-part display
+    if (poem.phonetic && typeof poem.phonetic === 'string') {
+      // Render with Sindhi, Romanization, and English together
+      const lineContainer = renderPoemWithPhonetic(poem);
+      poemBody.appendChild(lineContainer);
       
-      // Original stanza cell
-      const originalCell = document.createElement('div');
-      originalCell.className = 'stanza-cell original';
-      if (i < originalStanzas.length) {
-        originalCell.innerHTML = formatStanza(originalStanzas[i]);
-      } else {
-        // Add empty cell if original has fewer stanzas
-        originalCell.innerHTML = '&nbsp;';
+      // Keep the old grid structure for the translation toggle (for backward compatibility)
+      // Split both texts into stanzas for the toggle functionality
+      const originalStanzas = splitIntoStanzas(poem.original);
+      const translationStanzas = splitIntoStanzas(poem.translation);
+      const maxStanzas = Math.max(originalStanzas.length, translationStanzas.length);
+      
+      const stanzaGrid = document.createElement('div');
+      stanzaGrid.className = 'stanza-grid';
+      
+      for (let i = 0; i < maxStanzas; i++) {
+        const stanzaRow = document.createElement('div');
+        stanzaRow.className = 'stanza-row';
+        
+        const originalCell = document.createElement('div');
+        originalCell.className = 'stanza-cell original';
+        originalCell.innerHTML = i < originalStanzas.length ? formatStanza(originalStanzas[i]) : '&nbsp;';
+        stanzaRow.appendChild(originalCell);
+        
+        const translationCell = document.createElement('div');
+        translationCell.className = 'stanza-cell translation';
+        translationCell.innerHTML = i < translationStanzas.length ? formatStanza(translationStanzas[i]) : '&nbsp;';
+        stanzaRow.appendChild(translationCell);
+        
+        stanzaGrid.appendChild(stanzaRow);
       }
-      stanzaRow.appendChild(originalCell);
       
-      // Translation stanza cell
-      const translationCell = document.createElement('div');
-      translationCell.className = 'stanza-cell translation';
-      if (i < translationStanzas.length) {
-        translationCell.innerHTML = formatStanza(translationStanzas[i]);
-      } else {
-        // Add empty cell if translation has fewer stanzas
-        translationCell.innerHTML = '&nbsp;';
+      poemBody.appendChild(stanzaGrid);
+    } else {
+      // Fall back to original behavior for poems without phonetic data
+      const originalStanzas = splitIntoStanzas(poem.original);
+      const translationStanzas = splitIntoStanzas(poem.translation);
+      const maxStanzas = Math.max(originalStanzas.length, translationStanzas.length);
+      
+      const stanzaGrid = document.createElement('div');
+      stanzaGrid.className = 'stanza-grid';
+      
+      for (let i = 0; i < maxStanzas; i++) {
+        const stanzaRow = document.createElement('div');
+        stanzaRow.className = 'stanza-row';
+        
+        const originalCell = document.createElement('div');
+        originalCell.className = 'stanza-cell original';
+        originalCell.innerHTML = i < originalStanzas.length ? formatStanza(originalStanzas[i]) : '&nbsp;';
+        stanzaRow.appendChild(originalCell);
+        
+        const translationCell = document.createElement('div');
+        translationCell.className = 'stanza-cell translation';
+        translationCell.innerHTML = i < translationStanzas.length ? formatStanza(translationStanzas[i]) : '&nbsp;';
+        stanzaRow.appendChild(translationCell);
+        
+        stanzaGrid.appendChild(stanzaRow);
       }
-      stanzaRow.appendChild(translationCell);
       
-      stanzaGrid.appendChild(stanzaRow);
+      const original = document.createElement('p');
+      original.className = 'original';
+      original.innerHTML = formatText(poem.original);
+      poemBody.appendChild(original);
+      
+      poemBody.appendChild(stanzaGrid);
     }
-    
-    // For non-translation-visible state, show only original
-    const original = document.createElement('p');
-    original.className = 'original';
-    original.innerHTML = formatText(poem.original);
-    poemBody.appendChild(original);
-    
-    // Add the grid (hidden by default, shown when translation is visible)
-    poemBody.appendChild(stanzaGrid);
 
     pageContent.appendChild(header);
     pageContent.appendChild(poemBody);
