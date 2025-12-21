@@ -23,7 +23,6 @@ let nextBtn;
 let pages = [];
 let currentPage = 0;
 let poems = [];
-let floatingTranslationButton = null;
 let scrollIndicatorHidden = false;
 let resizeTimeout = null;
 let isMobileDeviceCache = null;
@@ -38,9 +37,7 @@ const eventHandlers = {
   resize: null,
   scrollIndicator: null,
   coverClick: null,
-  floatingButton: null,
   scrollHide: null,
-  desktopToggleButtons: new WeakMap() // Store handlers for desktop toggle buttons
 };
 
 // Utility: Escape HTML to prevent XSS
@@ -257,13 +254,6 @@ function renderPoems() {
     const topRow = document.createElement('div');
     topRow.className = 'footer-top';
     
-    const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'toggle-translation';
-    toggleBtn.type = 'button';
-    toggleBtn.textContent = 'Show translation';
-    toggleBtn.setAttribute('aria-label', 'Toggle translation visibility');
-    topRow.appendChild(toggleBtn);
-
     const pageCount = document.createElement('span');
     pageCount.className = 'page-count';
     pageCount.textContent = `Page ${index + 1} of ${poems.length}`;
@@ -315,8 +305,6 @@ function changePage(delta) {
       activeContent.scrollTop = 0;
       updateScrollShadow(activeContent);
     }
-    // Update floating button text on mobile
-    updateFloatingButton();
     // On mobile, scroll to top of the new poem
     if (isMobileDevice()) {
       const activePage = pages[currentPage];
@@ -371,94 +359,6 @@ function setupScrollShadows() {
   });
 }
 
-function updateFloatingButton() {
-  if (floatingTranslationButton && isMobileDevice()) {
-    const activePage = pages[currentPage];
-    if (activePage) {
-      const isVisible = activePage.classList.contains('translation-visible');
-      floatingTranslationButton.textContent = isVisible ? 'Hide translation' : 'Show translation';
-    }
-  }
-}
-
-
-function setupTranslationToggles() {
-  // Invalidate cache since device type might have changed
-  invalidateMobileCache();
-  const isMobile = isMobileDevice();
-  
-  if (isMobile) {
-    // Remove any existing floating button first
-    const existingButton = document.querySelector('body > .toggle-translation');
-    if (existingButton) {
-      existingButton.remove();
-    }
-    
-    // Remove existing event listener if present
-    if (eventHandlers.floatingButton) {
-      floatingTranslationButton?.removeEventListener('click', eventHandlers.floatingButton);
-      eventHandlers.floatingButton = null;
-    }
-    
-    // Create a single floating translation button for mobile (always visible)
-    floatingTranslationButton = document.createElement('button');
-    floatingTranslationButton.className = 'toggle-translation';
-    floatingTranslationButton.type = 'button';
-    floatingTranslationButton.textContent = 'Show translation';
-    floatingTranslationButton.setAttribute('aria-label', 'Toggle translation visibility');
-    document.body.appendChild(floatingTranslationButton);
-    
-    // Toggle translation for the active page
-    const floatingButtonHandler = () => {
-      const activePage = pages[currentPage];
-      if (activePage) {
-        const isVisible = activePage.classList.toggle('translation-visible');
-        floatingTranslationButton.textContent = isVisible ? 'Hide translation' : 'Show translation';
-      }
-    };
-    
-    floatingTranslationButton.addEventListener('click', floatingButtonHandler);
-    eventHandlers.floatingButton = floatingButtonHandler;
-    
-    // Initial text update
-    updateFloatingButton();
-  } else {
-    // Desktop: use buttons in each page footer
-    // Remove floating button if it exists
-    const existingButton = document.querySelector('body > .toggle-translation');
-    if (existingButton) {
-      existingButton.remove();
-      floatingTranslationButton = null;
-    }
-    
-    // Remove existing event listeners from toggle buttons and add new ones
-    document.querySelectorAll('.toggle-translation').forEach((button) => {
-      // Remove old listener if it exists
-      const oldHandler = eventHandlers.desktopToggleButtons.get(button);
-      if (oldHandler) {
-        button.removeEventListener('click', oldHandler);
-      }
-      
-      // Create named handler function so we can remove it later
-      const toggleHandler = () => {
-        const page = button.closest('.page');
-        if (!page) return;
-        
-        const isVisible = page.classList.toggle('translation-visible');
-        button.textContent = isVisible ? 'Hide translation' : 'Show translation';
-        // Update scroll shadow after translation toggle (content height may change)
-        const pageContent = page.querySelector('.page-content');
-        if (pageContent) {
-          setTimeout(() => updateScrollShadow(pageContent), TRANSLATION_TOGGLE_UPDATE_DELAY);
-        }
-      };
-      
-      // Store handler reference and add listener
-      eventHandlers.desktopToggleButtons.set(button, toggleHandler);
-      button.addEventListener('click', toggleHandler);
-    });
-  }
-}
 
 // Load poems from YAML files
 async function loadPoems() {
@@ -523,7 +423,6 @@ async function loadPoems() {
     
     // Initialize the notebook once all poems are loaded
     renderPoems();
-    setupTranslationToggles();
     updatePages();
     setupScrollShadows();
   } catch (error) {
@@ -752,7 +651,6 @@ function init() {
     invalidateMobileCache();
     resizeTimeout = setTimeout(() => {
       setupScrollShadows();
-      setupTranslationToggles();
     }, RESIZE_DEBOUNCE_DELAY);
   };
   

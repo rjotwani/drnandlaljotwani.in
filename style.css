@@ -3,12 +3,10 @@
    ============================================ */
 :root {
   color-scheme: light;
-  --bg: #f6efe5;
   --ink: #3a2e28;
   --accent: #be8c63;
   --accent-dark: #835737;
   --paper: #fffdf8;
-  --shadow: rgba(0, 0, 0, 0.15);
   
   /* Additional color variables */
   --text-secondary: #5c473c;
@@ -33,9 +31,7 @@
   --space-sm: 0.75rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
-  --space-xl: 2rem;
   --space-2xl: 3rem;
-  --space-3xl: 4rem;
   
   /* Layout */
   --border-radius-sm: 12px;
@@ -173,7 +169,7 @@ header .credentials {
   text-decoration: none;
   font-weight: 500;
   border-bottom: 1px dotted var(--accent);
-  transition: color 150ms ease, border-bottom-color 150ms ease;
+  transition: color var(--transition-fast), border-bottom-color var(--transition-fast);
 }
 
 .bio-line a:hover {
@@ -268,7 +264,7 @@ header .credentials {
   box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.25),
     inset 0 0 20px rgba(255, 255, 255, 0.3);
-  transition: transform 1200ms ease;
+  transition: transform var(--transition-cover);
   transform: rotateX(12deg);
 }
 
@@ -282,7 +278,7 @@ header .credentials {
 .cover {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #42210b, #7d4b21);
+  background: linear-gradient(135deg, var(--cover-start), var(--cover-end));
   border-radius: var(--border-radius-lg);
   box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
 }
@@ -290,7 +286,7 @@ header .credentials {
 .cover.front {
   transform-origin: left;
   transform: rotateY(0deg);
-  transition: transform 1200ms ease;
+  transition: transform var(--transition-cover);
   z-index: 5;
 }
 
@@ -328,7 +324,7 @@ header .credentials {
 }
 
 .cover.back {
-  background: linear-gradient(135deg, #2d1707, #513115);
+  background: linear-gradient(135deg, var(--cover-back-start), var(--cover-back-end));
 }
 
 .spine {
@@ -337,7 +333,7 @@ header .credentials {
   bottom: 0;
   width: 14px;
   left: calc(50% - 7px);
-  background: linear-gradient(180deg, #d6c1a5, #a2845d);
+  background: linear-gradient(180deg, var(--spine-start), var(--spine-end));
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.4);
   z-index: 1;
 }
@@ -364,8 +360,8 @@ header .credentials {
       0deg,
       rgba(255, 255, 255, 0),
       rgba(255, 255, 255, 0) 28px,
-      rgba(222, 212, 198, 0.45) 28px,
-      rgba(222, 212, 198, 0.45) 29px
+      var(--paper-line) 28px,
+      var(--paper-line) 29px
     ),
     var(--paper);
   border-radius: var(--border-radius-sm);
@@ -374,7 +370,7 @@ header .credentials {
     0 0 0 1px rgba(0, 0, 0, 0.03);
   transform-origin: left;
   transform-style: preserve-3d;
-  transition: transform 800ms ease, box-shadow 800ms ease;
+  transition: transform var(--transition-slow), box-shadow var(--transition-slow);
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
@@ -390,7 +386,7 @@ header .credentials {
   box-shadow: 5px 0 20px rgba(0, 0, 0, 0.08);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 300ms ease;
+  transition: opacity var(--transition-normal);
 }
 
 .page.active::after {
@@ -500,10 +496,6 @@ header .credentials {
   max-width: 100%;
 }
 
-.page:not(.translation-visible) .poem-body {
-  margin-left: clamp(2rem, 6vw, 4rem);
-}
-
 /* Original poem at the top */
 .poem-original {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
@@ -590,7 +582,7 @@ header .credentials {
 
 .footer-top {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
@@ -599,38 +591,6 @@ header .credentials {
   color: rgba(90, 70, 60, 0.85); /* Keep specific opacity */
   text-align: center;
   opacity: 0.85;
-}
-
-.toggle-translation {
-  border: none;
-  background: var(--accent);
-  color: #fffdf8;
-  border-radius: var(--border-radius-full);
-  padding: 0.35rem 0.9rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: transform 150ms ease, box-shadow 150ms ease;
-  min-height: 44px; /* Better touch target */
-}
-
-/* Hide floating button on desktop */
-body > .toggle-translation {
-  display: none;
-}
-
-.toggle-translation:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.toggle-translation:active {
-  transform: translateY(0);
-}
-
-.toggle-translation:focus {
-  outline: var(--focus-outline);
-  outline-offset: var(--focus-outline-offset);
 }
 
 .page-count {
@@ -662,7 +622,7 @@ body > .toggle-translation {
   cursor: pointer;
   font-size: 1.6rem;
   color: var(--accent-dark);
-  transition: transform 150ms ease, box-shadow 150ms ease;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .nav-btn:disabled {
@@ -802,7 +762,7 @@ body > .toggle-translation {
     position: absolute;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 300ms ease;
+    transition: opacity var(--transition-normal);
     height: auto;
     min-height: auto;
     width: 100%;
@@ -822,9 +782,6 @@ body > .toggle-translation {
   .poem-body {
     grid-template-columns: 1fr !important;
     margin-left: 0 !important;
-  }
-
-  .poem-body {
     gap: var(--space-lg);
   }
 
@@ -866,33 +823,6 @@ body > .toggle-translation {
     display: none;
   }
 
-  /* Floating translation button on mobile */
-  body > .toggle-translation {
-    display: block !important;
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    border-radius: var(--border-radius-full);
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    min-height: 44px;
-    /* Smooth pop-in / pop-out animation */
-    transition: opacity var(--transition-normal), transform var(--transition-normal);
-  }
-
-  .page footer {
-    padding-bottom: 4rem;
-  }
-
-  .page footer .footer-top {
-    justify-content: center;
-  }
-
-  .page footer .toggle-translation {
-    display: none;
-  }
 
   .instruction {
     margin-top: var(--space-md);
@@ -1012,7 +942,7 @@ body > .toggle-translation {
     position: absolute;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 300ms ease;
+    transition: opacity var(--transition-normal);
     padding: clamp(0.8rem, 2vw, 1.2rem);
     box-shadow:
       inset 0 0 2px rgba(0, 0, 0, 0.06),
@@ -1076,39 +1006,12 @@ body > .toggle-translation {
 
   .page footer {
     padding-top: 0.1rem;
-    font-size: 0.8rem;
-  }
-
-  .toggle-translation {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    min-height: 44px;
-  }
-
-  /* Floating translation button on mobile landscape */
-  body > .toggle-translation {
-    display: block !important;
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    z-index: 1000;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    border-radius: var(--border-radius-full);
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    min-height: 44px;
-  }
-
-  .page footer {
     padding-bottom: 3rem;
+    font-size: 0.8rem;
   }
 
   .page footer .footer-top {
     justify-content: center;
-  }
-
-  .page footer .toggle-translation {
-    display: none;
   }
 
   .page-navigation {
