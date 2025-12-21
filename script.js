@@ -82,6 +82,13 @@ function formatStanza(stanza) {
   return lines.map(line => escapeHtml(line)).join('<br />');
 }
 
+// Split text into individual lines (preserving empty lines as empty strings)
+function splitIntoLines(text) {
+  if (typeof text !== 'string') return [];
+  const normalized = normalizeLineEndings(text);
+  return normalized.split('\n');
+}
+
 // Convert newlines to <br /> tags, preserving paragraph breaks (for non-grid layout)
 function formatText(text) {
   if (typeof text !== 'string') return '';
@@ -190,40 +197,60 @@ function renderPoems() {
     const poemBody = document.createElement('div');
     poemBody.className = 'poem-body';
 
-    // Split both texts into stanzas
-    const originalStanzas = splitIntoStanzas(poem.original);
-    const translationStanzas = splitIntoStanzas(poem.translation);
+    // Split texts into lines for line-by-line display
+    const originalLines = splitIntoLines(poem.original);
+    const phoneticLines = poem.phonetic ? splitIntoLines(poem.phonetic) : [];
+    const translationLines = splitIntoLines(poem.translation);
     
-    // Determine the maximum number of stanzas to ensure we have matching pairs
-    const maxStanzas = Math.max(originalStanzas.length, translationStanzas.length);
+    // Determine the maximum number of lines
+    const maxLines = Math.max(originalLines.length, translationLines.length);
     
-    // Create a grid container for stanza pairs
+    // Create a grid container for line pairs
     const stanzaGrid = document.createElement('div');
     stanzaGrid.className = 'stanza-grid';
     
-    // Create rows for each stanza pair
-    for (let i = 0; i < maxStanzas; i++) {
+    // Create rows for each line pair
+    for (let i = 0; i < maxLines; i++) {
       const stanzaRow = document.createElement('div');
       stanzaRow.className = 'stanza-row';
       
-      // Original stanza cell
+      // Original line cell (with phonetic underneath if available)
       const originalCell = document.createElement('div');
       originalCell.className = 'stanza-cell original';
-      if (i < originalStanzas.length) {
-        originalCell.innerHTML = formatStanza(originalStanzas[i]);
+      
+      const originalLineContainer = document.createElement('div');
+      originalLineContainer.className = 'original-line-container';
+      
+      // Add original Sindhi line
+      if (i < originalLines.length && originalLines[i].trim()) {
+        const originalLine = document.createElement('div');
+        originalLine.className = 'original-line';
+        originalLine.textContent = originalLines[i].trim();
+        originalLineContainer.appendChild(originalLine);
+        
+        // Add phonetic line underneath if available
+        if (i < phoneticLines.length && phoneticLines[i].trim()) {
+          const phoneticLine = document.createElement('div');
+          phoneticLine.className = 'phonetic-line';
+          phoneticLine.textContent = phoneticLines[i].trim();
+          originalLineContainer.appendChild(phoneticLine);
+        }
+      } else if (i < originalLines.length) {
+        // Empty line - add spacing
+        originalLineContainer.innerHTML = '&nbsp;';
       } else {
-        // Add empty cell if original has fewer stanzas
-        originalCell.innerHTML = '&nbsp;';
+        originalLineContainer.innerHTML = '&nbsp;';
       }
+      
+      originalCell.appendChild(originalLineContainer);
       stanzaRow.appendChild(originalCell);
       
-      // Translation stanza cell
+      // Translation line cell
       const translationCell = document.createElement('div');
       translationCell.className = 'stanza-cell translation';
-      if (i < translationStanzas.length) {
-        translationCell.innerHTML = formatStanza(translationStanzas[i]);
+      if (i < translationLines.length && translationLines[i].trim()) {
+        translationCell.textContent = translationLines[i].trim();
       } else {
-        // Add empty cell if translation has fewer stanzas
         translationCell.innerHTML = '&nbsp;';
       }
       stanzaRow.appendChild(translationCell);
