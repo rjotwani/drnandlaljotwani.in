@@ -8,7 +8,6 @@
   --accent: #be8c63;
   --accent-dark: #835737;
   --paper: #fffdf8;
-  --shadow: rgba(0, 0, 0, 0.15);
   
   /* Additional color variables */
   --text-secondary: #5c473c;
@@ -20,22 +19,13 @@
   --bg-gradient-start: #fefbf7;
   --bg-gradient-mid: #ecdfcf;
   --bg-gradient-end: #ddc8af;
-  --cover-start: #42210b;
-  --cover-end: #7d4b21;
-  --cover-back-start: #2d1707;
-  --cover-back-end: #513115;
-  --spine-start: #d6c1a5;
-  --spine-end: #a2845d;
-  --paper-line: rgba(222, 212, 198, 0.45);
   
   /* Spacing scale */
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
-  --space-xl: 2rem;
   --space-2xl: 3rem;
-  --space-3xl: 4rem;
   
   /* Layout */
   --border-radius-sm: 12px;
@@ -44,10 +34,7 @@
   --border-radius-full: 999px;
   
   /* Transitions */
-  --transition-fast: 150ms ease;
   --transition-normal: 300ms ease;
-  --transition-slow: 800ms ease;
-  --transition-cover: 1200ms ease;
   
   /* Focus outline */
   --focus-outline: 2px solid var(--accent-dark);
@@ -516,7 +503,7 @@ header .credentials {
   display: none;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   row-gap: clamp(0.8rem, 1.8vw, 1.5rem);
-  column-gap: clamp(1rem, 2.5vw, 2rem);;
+  column-gap: clamp(1rem, 2.5vw, 2rem);
   width: 100%;
   align-items: end;
 }
@@ -533,7 +520,6 @@ header .credentials {
 
 .stanza-row {
   display: contents;
-  align-items: flex-end;
 }
 
 .stanza-cell {
@@ -658,7 +644,7 @@ header .credentials {
 .toggle-translation {
   border: none;
   background: var(--accent);
-  color: #fffdf8;
+  color: var(--paper);
   border-radius: var(--border-radius-full);
   padding: 0.35rem 0.9rem;
   font-size: 0.9rem;
@@ -709,7 +695,7 @@ body > .toggle-translation {
   min-height: 44px;
   border-radius: 50%;
   border: none;
-  background: #fffdf8;
+  background: var(--paper);
   box-shadow:
     0 10px 25px rgba(0, 0, 0, 0.2),
     inset 0 0 0 1px rgba(0, 0, 0, 0.08);
@@ -1147,7 +1133,16 @@ body > .toggle-translation {
 
   .page footer {
     padding-top: 0.1rem;
+    padding-bottom: 3rem;
     font-size: 0.8rem;
+  }
+
+  .page footer .footer-top {
+    justify-content: center;
+  }
+
+  .page footer .toggle-translation {
+    display: none;
   }
 
   .toggle-translation {
@@ -1168,18 +1163,6 @@ body > .toggle-translation {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
     min-height: 44px;
-  }
-
-  .page footer {
-    padding-bottom: 3rem;
-  }
-
-  .page footer .footer-top {
-    justify-content: center;
-  }
-
-  .page footer .toggle-translation {
-    display: none;
   }
 
   .page-navigation {

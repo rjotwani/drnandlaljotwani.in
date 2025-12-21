@@ -58,30 +58,6 @@ function normalizeLineEndings(text) {
   return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
-// Split text into stanzas (paragraphs separated by blank lines)
-function splitIntoStanzas(text) {
-  if (typeof text !== 'string') return [];
-  
-  const normalized = normalizeLineEndings(text);
-  return normalized
-    .split(/\n\s*\n+/) // Split on one or more newlines with optional whitespace
-    .map(stanza => stanza.trim())
-    .filter(stanza => stanza.length > 0);
-}
-
-// Format a single stanza (convert single newlines to <br /> tags)
-function formatStanza(stanza) {
-  if (typeof stanza !== 'string') return '';
-  
-  const lines = stanza
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
-  
-  // Escape each line and join with <br />
-  return lines.map(line => escapeHtml(line)).join('<br />');
-}
-
 // Split text into individual lines (preserving empty lines as empty strings)
 function splitIntoLines(text) {
   if (typeof text !== 'string') return [];
@@ -235,10 +211,8 @@ function renderPoems() {
           phoneticLine.textContent = phoneticLines[i].trim();
           originalLineContainer.appendChild(phoneticLine);
         }
-      } else if (i < originalLines.length) {
-        // Empty line - add spacing
-        originalLineContainer.innerHTML = '&nbsp;';
       } else {
+        // Empty line or beyond original lines - add spacing
         originalLineContainer.innerHTML = '&nbsp;';
       }
       
@@ -551,8 +525,8 @@ async function loadPoems() {
       pagesContainer.innerHTML = `
         <div style="padding: 2rem; text-align: center; color: var(--ink);">
           <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">Error loading poems</p>
-          <p style="font-size: 0.9rem; color: #7a6456;">${errorMessage}</p>
-          <p style="font-size: 0.85rem; margin-top: 1rem; color: #7a6456;">Please check the console for details.</p>
+          <p style="font-size: 0.9rem; color: var(--text-tertiary);">${errorMessage}</p>
+          <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--text-tertiary);">Please check the console for details.</p>
         </div>
       `;
     }
@@ -587,7 +561,6 @@ function setupNotebookReveal() {
     
     notebook.classList.add('open');
     hideScrollIndicator();
-    // Observer is set up after pages render, no need to set it up here
     setTimeout(() => {
       notebook.classList.add('label-hidden');
     }, LABEL_HIDE_DELAY);
