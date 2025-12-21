@@ -507,13 +507,14 @@ header .credentials {
   max-width: 100%;
 }
 
-.page:not(.translation-visible) .poem-body {
+/* Keep single column layout when showing three-part display */
+.page.translation-visible .poem-body:has(.poem-line-container) {
+  grid-template-columns: 1fr;
   margin-left: clamp(2rem, 6vw, 4rem);
 }
 
-/* Remove margin when using three-part display (phonetic data exists) */
-.page:not(.translation-visible) .poem-body:has(.poem-line-container) {
-  margin-left: 0;
+.page:not(.translation-visible) .poem-body {
+  margin-left: clamp(2rem, 6vw, 4rem);
 }
 
 /* Stanza grid for aligned display */
@@ -531,11 +532,16 @@ header .credentials {
 }
 
 /* Hide stanza-grid when using three-part display (phonetic data exists) */
-.poem-body:has(.poem-line-container) .stanza-grid {
+.page:has(.poem-line-container) .stanza-grid {
   display: none !important;
 }
 
 .page.translation-visible .poem-body > .original {
+  display: none;
+}
+
+/* Hide original when three-part display is visible (for poems with phonetic data) */
+.page.translation-visible .poem-body:has(.poem-line-container) > .original {
   display: none;
 }
 
@@ -600,11 +606,11 @@ header .credentials {
   width: 100%;
   padding: 0;
   margin: 0;
-  display: block;
+  display: none; /* Hidden by default */
 }
 
 .page.translation-visible .poem-line-container {
-  display: block; /* Always show when phonetic data exists */
+  display: block; /* Show when translation is visible */
 }
 
 .poem-line-group {
@@ -905,6 +911,12 @@ body > .toggle-translation {
     gap: var(--space-md);
   }
 
+  /* Keep single column layout when showing three-part display */
+  .page.translation-visible .poem-body:has(.poem-line-container) {
+    grid-template-columns: 1fr !important;
+    margin-left: clamp(2rem, 6vw, 4rem) !important;
+  }
+
   .page.translation-visible .stanza-grid {
     grid-template-columns: 1fr 1fr !important;
     gap: var(--space-sm);
@@ -1152,6 +1164,12 @@ body > .toggle-translation {
   .page.translation-visible .poem-body {
     grid-template-columns: 1fr 1fr !important;
     gap: var(--space-sm);
+  }
+
+  /* Keep single column layout when showing three-part display */
+  .page.translation-visible .poem-body:has(.poem-line-container) {
+    grid-template-columns: 1fr !important;
+    margin-left: clamp(2rem, 6vw, 4rem) !important;
   }
 
   .page.translation-visible .stanza-grid {

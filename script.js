@@ -266,7 +266,13 @@ function renderPoems() {
 
     // Check if this poem has phonetic data - if so, use new three-part display
     if (poem.phonetic && typeof poem.phonetic === 'string') {
-      // Render with Sindhi, Romanization, and English together
+      // Show original Sindhi text by default
+      const original = document.createElement('p');
+      original.className = 'original';
+      original.innerHTML = formatText(poem.original);
+      poemBody.appendChild(original);
+      
+      // Render with Sindhi, Romanization, and English together (hidden by default)
       const lineContainer = renderPoemWithPhonetic(poem);
       poemBody.appendChild(lineContainer);
       
