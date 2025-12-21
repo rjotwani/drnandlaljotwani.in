@@ -1,14 +1,14 @@
 {
   "poems": [
-    "i-fear.yaml",
-    "vande-mataram.yaml",
-    "i-am-wrong-and-you-alone-are-right.yaml",
-    "why-did-you-partition-the-land.yaml",
-    "on-time-youth-love-and-leaving.yaml",
-    "on-restraint-fame-and-romance.yaml",
+    "i_fear.yaml",
+    "vande_mataram.yaml",
+    "i_am_wrong_and_you_alone_are_right.yaml",
+    "why_did_you_partition_the_land.yaml",
+    "on_time_youth_love_and_leaving.yaml",
+    "on_restraint_fame_and_romance.yaml",
     "patriotism.yaml",
-    "our-salute-to-hemu-kalani.yaml",
-    "when-you-look-at-me-with-intoxicating-eyes.yaml"
+    "our_salute_to_hemu_kalani.yaml",
+    "when_you_look_at_me_with_intoxicating_eyes.yaml"
   ]
 }
 
