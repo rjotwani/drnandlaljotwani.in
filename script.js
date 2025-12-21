@@ -58,28 +58,11 @@ function normalizeLineEndings(text) {
   return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
-// Split text into stanzas (paragraphs separated by blank lines)
-function splitIntoStanzas(text) {
+// Split text into individual lines (preserving empty lines as empty strings)
+function splitIntoLines(text) {
   if (typeof text !== 'string') return [];
-  
   const normalized = normalizeLineEndings(text);
-  return normalized
-    .split(/\n\s*\n+/) // Split on one or more newlines with optional whitespace
-    .map(stanza => stanza.trim())
-    .filter(stanza => stanza.length > 0);
-}
-
-// Format a single stanza (convert single newlines to <br /> tags)
-function formatStanza(stanza) {
-  if (typeof stanza !== 'string') return '';
-  
-  const lines = stanza
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0);
-  
-  // Escape each line and join with <br />
-  return lines.map(line => escapeHtml(line)).join('<br />');
+  return normalized.split('\n');
 }
 
 // Convert newlines to <br /> tags, preserving paragraph breaks (for non-grid layout)
@@ -190,40 +173,58 @@ function renderPoems() {
     const poemBody = document.createElement('div');
     poemBody.className = 'poem-body';
 
-    // Split both texts into stanzas
-    const originalStanzas = splitIntoStanzas(poem.original);
-    const translationStanzas = splitIntoStanzas(poem.translation);
+    // Split texts into lines for line-by-line display
+    const originalLines = splitIntoLines(poem.original);
+    const phoneticLines = poem.phonetic ? splitIntoLines(poem.phonetic) : [];
+    const translationLines = splitIntoLines(poem.translation);
     
-    // Determine the maximum number of stanzas to ensure we have matching pairs
-    const maxStanzas = Math.max(originalStanzas.length, translationStanzas.length);
+    // Determine the maximum number of lines
+    const maxLines = Math.max(originalLines.length, translationLines.length);
     
-    // Create a grid container for stanza pairs
+    // Create a grid container for line pairs
     const stanzaGrid = document.createElement('div');
     stanzaGrid.className = 'stanza-grid';
     
-    // Create rows for each stanza pair
-    for (let i = 0; i < maxStanzas; i++) {
+    // Create rows for each line pair
+    for (let i = 0; i < maxLines; i++) {
       const stanzaRow = document.createElement('div');
       stanzaRow.className = 'stanza-row';
       
-      // Original stanza cell
+      // Original line cell (with phonetic underneath if available)
       const originalCell = document.createElement('div');
       originalCell.className = 'stanza-cell original';
-      if (i < originalStanzas.length) {
-        originalCell.innerHTML = formatStanza(originalStanzas[i]);
+      
+      const originalLineContainer = document.createElement('div');
+      originalLineContainer.className = 'original-line-container';
+      
+      // Add original Sindhi line
+      if (i < originalLines.length && originalLines[i].trim()) {
+        const originalLine = document.createElement('div');
+        originalLine.className = 'original-line';
+        originalLine.textContent = originalLines[i].trim();
+        originalLineContainer.appendChild(originalLine);
+        
+        // Add phonetic line underneath if available
+        if (i < phoneticLines.length && phoneticLines[i].trim()) {
+          const phoneticLine = document.createElement('div');
+          phoneticLine.className = 'phonetic-line';
+          phoneticLine.textContent = phoneticLines[i].trim();
+          originalLineContainer.appendChild(phoneticLine);
+        }
       } else {
-        // Add empty cell if original has fewer stanzas
-        originalCell.innerHTML = '&nbsp;';
+        // Empty line or beyond original lines - add spacing
+        originalLineContainer.innerHTML = '&nbsp;';
       }
+      
+      originalCell.appendChild(originalLineContainer);
       stanzaRow.appendChild(originalCell);
       
-      // Translation stanza cell
+      // Translation line cell
       const translationCell = document.createElement('div');
       translationCell.className = 'stanza-cell translation';
-      if (i < translationStanzas.length) {
-        translationCell.innerHTML = formatStanza(translationStanzas[i]);
+      if (i < translationLines.length && translationLines[i].trim()) {
+        translationCell.textContent = translationLines[i].trim();
       } else {
-        // Add empty cell if translation has fewer stanzas
         translationCell.innerHTML = '&nbsp;';
       }
       stanzaRow.appendChild(translationCell);
@@ -524,8 +525,8 @@ async function loadPoems() {
       pagesContainer.innerHTML = `
         <div style="padding: 2rem; text-align: center; color: var(--ink);">
           <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">Error loading poems</p>
-          <p style="font-size: 0.9rem; color: #7a6456;">${errorMessage}</p>
-          <p style="font-size: 0.85rem; margin-top: 1rem; color: #7a6456;">Please check the console for details.</p>
+          <p style="font-size: 0.9rem; color: var(--text-tertiary);">${errorMessage}</p>
+          <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--text-tertiary);">Please check the console for details.</p>
         </div>
       `;
     }
@@ -560,7 +561,6 @@ function setupNotebookReveal() {
     
     notebook.classList.add('open');
     hideScrollIndicator();
-    // Observer is set up after pages render, no need to set it up here
     setTimeout(() => {
       notebook.classList.add('label-hidden');
     }, LABEL_HIDE_DELAY);
