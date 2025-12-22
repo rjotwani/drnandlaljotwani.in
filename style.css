@@ -263,6 +263,34 @@ header .credentials {
   transform: rotateX(0deg);
 }
 
+/* Safari workaround: disable 3D transforms to prevent rendering bugs */
+body.safari .notebook {
+  transform: none !important;
+  transform-style: flat !important;
+}
+
+body.safari .notebook.open {
+  transform: none !important;
+}
+
+body.safari .pages {
+  perspective: none !important;
+  transform-style: flat !important;
+}
+
+body.safari .page {
+  transform-style: flat !important;
+  transform: none !important;
+  backface-visibility: visible !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.safari .page.active {
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+
 /* ============================================
    Notebook Cover & Spine
    ============================================ */
@@ -360,13 +388,15 @@ header .credentials {
     inset 0 0 3px rgba(0, 0, 0, 0.08),
     0 0 0 1px rgba(0, 0, 0, 0.03);
   transform-origin: left;
-  transform-style: preserve-3d;
+  /* Safari fix: remove nested preserve-3d which causes rendering issues */
+  transform-style: flat;
   transition: transform 800ms ease, box-shadow 800ms ease;
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
-  overflow: hidden;
+  /* Safari fix: overflow hidden breaks 3D rendering - moved overflow to page-content */
+  overflow: visible;
 }
 
 .page::after {
@@ -383,6 +413,7 @@ header .credentials {
 .page.active::after {
   opacity: 1;
 }
+
 
 /* ============================================
    Page Content

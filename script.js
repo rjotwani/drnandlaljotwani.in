@@ -612,8 +612,18 @@ function setupNotebookReveal() {
   }
 }
 
+// Detect Safari and add class to body for CSS workarounds
+function detectSafari() {
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  if (isSafari) {
+    document.body.classList.add('safari');
+  }
+}
+
 // Initialize the application
 function init() {
+  detectSafari();
+  
   // Validate DOM elements
   notebook = document.getElementById('notebook');
   pagesContainer = document.getElementById('pages');
