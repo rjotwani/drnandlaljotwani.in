@@ -572,7 +572,7 @@ body.safari .page.active {
 
 .stanza-cell.original {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
-  font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+  font-size: clamp(0.7rem, 1.2vw, 0.85rem);
   line-height: 1.5;
   text-align: right;
   display: flex;
@@ -921,7 +921,7 @@ body > .toggle-translation {
   }
 
   .stanza-cell.original {
-    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    font-size: clamp(0.7rem, 1.2vw, 0.85rem);
     line-height: 1.3;
   }
 
