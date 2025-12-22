@@ -162,6 +162,14 @@ function renderPoems() {
     h2.textContent = poem.title;
     header.appendChild(h2);
     
+    // Add phonetic title if available
+    if (poem.titlePhonetic) {
+      const h3Phonetic = document.createElement('h3');
+      h3Phonetic.className = 'title-phonetic';
+      h3Phonetic.textContent = poem.titlePhonetic;
+      header.appendChild(h3Phonetic);
+    }
+    
     // Add translated title if available
     if (poem.titleTranslation) {
       const h3 = document.createElement('h3');

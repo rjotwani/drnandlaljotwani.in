@@ -497,18 +497,27 @@ body.safari .page.active {
 .page h2 {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   letter-spacing: 0.05em;
+}
+
+.page header .title-phonetic {
+  font-family: "Spectral", serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-secondary);
+  margin: 0 0 0 0;
+  letter-spacing: 0.01em;
 }
 
 .page header .title-translation {
   font-family: "Spectral", serif;
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 400;
-  font-style: italic;
   color: var(--text-secondary);
-  margin: 0.4rem 0 0 0;
-  letter-spacing: 0.02em;
+  margin: 0 0 0 0;
+  letter-spacing: 0.01em;
 }
 
 .poem-body {
@@ -1120,9 +1129,14 @@ body > .toggle-translation {
     margin-bottom: var(--space-xs);
   }
 
+  .page header .title-phonetic {
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+  }
+
   .page header .title-translation {
     font-size: 0.85rem;
-    margin-top: 0.2rem;
+    margin-top: 0.15rem;
   }
 
   .poem-body {
