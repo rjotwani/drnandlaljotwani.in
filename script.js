@@ -158,6 +158,15 @@ function renderPoems() {
     pageContent.className = 'page-content';
 
     const header = document.createElement('header');
+
+    // Add "originally untitled" indicator if applicable
+    if (poem.untitled) {
+      const untitledIndicator = document.createElement('span');
+      untitledIndicator.className = 'untitled-indicator';
+      untitledIndicator.textContent = 'originally untitled';
+      header.appendChild(untitledIndicator);
+    }
+
     const h2 = document.createElement('h2');
     h2.textContent = poem.title;
     header.appendChild(h2);
