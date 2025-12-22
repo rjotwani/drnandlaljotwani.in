@@ -310,7 +310,7 @@ body.safari .page.active {
 }
 
 .cover.front::after {
-  content: "Dr. Nandlal Jotwani · Sindhi Verse";
+  content: "डॉ. नंदलाल जोतवानी · Dr. Nandlal Jotwani";
   position: absolute;
   left: 11%;
   right: 40%;
