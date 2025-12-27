@@ -44,7 +44,11 @@ const eventHandlers = {
   desktopToggleButtons: new WeakMap() // Store handlers for desktop toggle buttons
 };
 
-// Utility: Escape HTML to prevent XSS
+/**
+ * Escapes HTML special characters to prevent XSS attacks
+ * @param {string} text - The text to escape
+ * @returns {string} The escaped HTML string
+ */
 function escapeHtml(text) {
   if (typeof text !== 'string') return '';
   const div = document.createElement('div');
@@ -52,22 +56,34 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Utility: Normalize line endings
+/**
+ * Normalizes line endings to Unix format (\n)
+ * @param {string} text - The text to normalize
+ * @returns {string} The normalized text
+ */
 function normalizeLineEndings(text) {
   if (typeof text !== 'string') return '';
   return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
-// Split text into individual lines (preserving empty lines as empty strings)
+/**
+ * Splits text into individual lines, preserving empty lines as empty strings
+ * @param {string} text - The text to split
+ * @returns {string[]} Array of lines
+ */
 function splitIntoLines(text) {
   if (typeof text !== 'string') return [];
   const normalized = normalizeLineEndings(text);
   return normalized.split('\n');
 }
 
-// Parse text with {} markers and return processed HTML with hover spans
-// Also returns marker positions for line-by-line rendering
-// Returns: { html: string, markerPositions: Array<{start: number, end: number, hoverText: string, markerId: number}> }
+/**
+ * Parses text with {} markers and returns processed HTML with hover spans
+ * Also returns marker positions for line-by-line rendering
+ * @param {string} text - The text to parse (may contain {marker} syntax)
+ * @param {string[]} hoverTextArray - Array of hover text for each marker
+ * @returns {{html: string, markerPositions: Array<{start: number, end: number, hoverText: string, markerId: number}>}}
+ */
 function parseTextWithMarkers(text, hoverTextArray) {
   if (typeof text !== 'string' || !hoverTextArray || !Array.isArray(hoverTextArray)) {
     return { html: escapeHtml(text), markerPositions: [] };
@@ -78,8 +94,8 @@ function parseTextWithMarkers(text, hoverTextArray) {
   const parts = [];
   let lastIndex = 0;
   
-  // Find all {} markers - the regex already supports multi-line markers
-  const markerRegex = /\{([^}]+)\}/gs; // 's' flag makes . match newlines, but we use [^}] which already matches newlines
+  // Find all {} markers (supports multi-line markers via [^}]+)
+  const markerRegex = /\{([^}]+)\}/gs;
   let match;
   
   while ((match = markerRegex.exec(text)) !== null) {
@@ -155,43 +171,18 @@ function parseTextWithMarkers(text, hoverTextArray) {
   return { html, markerPositions };
 }
 
-// Convert newlines to <br /> tags, preserving paragraph breaks (for non-grid layout)
-function formatText(text) {
-  if (typeof text !== 'string') return '';
-  
-  const normalized = normalizeLineEndings(text);
-  const lines = normalized.split('\n');
-  const result = [];
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const isEmpty = line.trim() === '';
-    const prevLine = i > 0 ? lines[i - 1] : null;
-    const prevWasEmpty = prevLine ? prevLine.trim() === '' : false;
-    
-    if (isEmpty) {
-      // Only add one break for consecutive empty lines (paragraph break)
-      if (!prevWasEmpty && result.length > 0) {
-        result.push('<br />');
-      }
-    } else {
-      // Add break before this line if there was a previous line
-      if (result.length > 0) {
-        result.push('<br />');
-      }
-      result.push(escapeHtml(line));
-    }
-  }
-  
-  return result.join('');
-}
-
-// Get current scroll position (replaces deprecated pageYOffset)
+/**
+ * Gets the current vertical scroll position
+ * @returns {number} The scroll position in pixels
+ */
 function getScrollTop() {
   return window.scrollY ?? document.documentElement.scrollTop ?? 0;
 }
 
-// Helper function to detect mobile devices (cached for performance)
+/**
+ * Detects if the current device is a mobile device (cached for performance)
+ * @returns {boolean} True if mobile device, false otherwise
+ */
 function isMobileDevice() {
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -220,14 +211,20 @@ function isMobileDevice() {
   return isMobileDeviceCache;
 }
 
-// Invalidate mobile device cache on resize
+/**
+ * Invalidates the mobile device detection cache
+ * Should be called when window dimensions change
+ */
 function invalidateMobileCache() {
   isMobileDeviceCache = null;
   cachedWindowWidth = null;
   cachedWindowHeight = null;
 }
 
-// Render poems into pages
+/**
+ * Renders all loaded poems into page elements
+ * Creates DOM structure for each poem with original, phonetic, and translation text
+ */
 function renderPoems() {
   if (!pagesContainer) {
     console.error('Pages container not found');
@@ -259,6 +256,7 @@ function renderPoems() {
 
     const h2 = document.createElement('h2');
     h2.textContent = poem.title;
+    h2.setAttribute('lang', 'sd'); // Sindhi language
     header.appendChild(h2);
     
     // Add phonetic title if available
@@ -266,6 +264,7 @@ function renderPoems() {
       const h3Phonetic = document.createElement('h3');
       h3Phonetic.className = 'title-phonetic';
       h3Phonetic.textContent = poem.titlePhonetic;
+      h3Phonetic.setAttribute('lang', 'en'); // Phonetic transliteration in English script
       header.appendChild(h3Phonetic);
     }
     
@@ -274,6 +273,7 @@ function renderPoems() {
       const h3 = document.createElement('h3');
       h3.className = 'title-translation';
       h3.textContent = poem.titleTranslation;
+      h3.setAttribute('lang', 'en'); // English translation
       header.appendChild(h3);
     }
 
@@ -435,6 +435,7 @@ function renderPoems() {
       if (i < originalHtmlLines.length && originalHtmlLines[i].trim()) {
         const originalLine = document.createElement('div');
         originalLine.className = 'original-line';
+        originalLine.setAttribute('lang', 'sd'); // Sindhi language
         originalLine.innerHTML = originalHtmlLines[i];
         originalLineContainer.appendChild(originalLine);
         
@@ -442,6 +443,7 @@ function renderPoems() {
         if (i < phoneticHtmlLines.length && phoneticHtmlLines[i].trim()) {
           const phoneticLine = document.createElement('div');
           phoneticLine.className = 'phonetic-line';
+          phoneticLine.setAttribute('lang', 'en'); // Phonetic transliteration
           phoneticLine.innerHTML = phoneticHtmlLines[i];
           originalLineContainer.appendChild(phoneticLine);
         }
@@ -449,12 +451,14 @@ function renderPoems() {
         // Fallback: if HTML parsing didn't produce a line, use the original line
         const originalLine = document.createElement('div');
         originalLine.className = 'original-line';
+        originalLine.setAttribute('lang', 'sd'); // Sindhi language
         originalLine.textContent = originalLines[i].trim();
         originalLineContainer.appendChild(originalLine);
         
         if (i < phoneticLines.length && phoneticLines[i].trim()) {
           const phoneticLine = document.createElement('div');
           phoneticLine.className = 'phonetic-line';
+          phoneticLine.setAttribute('lang', 'en'); // Phonetic transliteration
           phoneticLine.textContent = phoneticLines[i].trim();
           originalLineContainer.appendChild(phoneticLine);
         }
@@ -469,6 +473,7 @@ function renderPoems() {
       // Translation line cell
       const translationCell = document.createElement('div');
       translationCell.className = 'stanza-cell translation';
+      translationCell.setAttribute('lang', 'en'); // English translation
       if (i < translationHtmlLines.length && translationHtmlLines[i].trim()) {
         translationCell.innerHTML = translationHtmlLines[i];
       } else if (i < translationLines.length && translationLines[i].trim()) {
@@ -484,6 +489,7 @@ function renderPoems() {
     // For non-translation-visible state, show only original
     const original = document.createElement('p');
     original.className = 'original';
+    original.setAttribute('lang', 'sd'); // Sindhi language
     
     // Use the already-parsed original HTML (allows markers to span multiple lines)
     // Replace newlines with <br /> tags for display
@@ -541,6 +547,10 @@ function renderPoems() {
   });
 }
 
+/**
+ * Updates the visual state of all pages based on current page index
+ * Handles page flipping animations and button states
+ */
 function updatePages() {
   if (!prevBtn || !nextBtn) return;
   
@@ -556,6 +566,10 @@ function updatePages() {
   nextBtn.disabled = currentPage === pages.length - 1;
 }
 
+/**
+ * Changes the current page by the specified delta
+ * @param {number} delta - The number of pages to move (positive for next, negative for previous)
+ */
 function changePage(delta) {
   if (pages.length === 0) return;
   
@@ -859,7 +873,103 @@ function setupTranslationToggles() {
   }
 }
 
-// Load poems from YAML files
+/**
+ * Validates a poem object structure and content
+ * @param {Object} poem - The poem object to validate
+ * @param {string} filename - The filename for error messages
+ * @throws {Error} If validation fails
+ */
+function validatePoem(poem, filename) {
+  if (!poem || typeof poem !== 'object') {
+    throw new Error(`Invalid poem format in ${filename}: not an object`);
+  }
+  
+  // Required fields
+  if (!poem.title || typeof poem.title !== 'string' || poem.title.trim() === '') {
+    throw new Error(`Invalid poem format in ${filename}: missing or invalid title`);
+  }
+  
+  if (!poem.original || typeof poem.original !== 'string' || poem.original.trim() === '') {
+    throw new Error(`Invalid poem format in ${filename}: missing or invalid original`);
+  }
+  
+  if (!poem.translation || typeof poem.translation !== 'string' || poem.translation.trim() === '') {
+    throw new Error(`Invalid poem format in ${filename}: missing or invalid translation`);
+  }
+  
+  // Optional fields validation
+  if (poem.titlePhonetic !== undefined && (typeof poem.titlePhonetic !== 'string' || poem.titlePhonetic.trim() === '')) {
+    throw new Error(`Invalid poem format in ${filename}: titlePhonetic must be a non-empty string if provided`);
+  }
+  
+  if (poem.titleTranslation !== undefined && (typeof poem.titleTranslation !== 'string' || poem.titleTranslation.trim() === '')) {
+    throw new Error(`Invalid poem format in ${filename}: titleTranslation must be a non-empty string if provided`);
+  }
+  
+  if (poem.phonetic !== undefined && (typeof poem.phonetic !== 'string' || poem.phonetic.trim() === '')) {
+    throw new Error(`Invalid poem format in ${filename}: phonetic must be a non-empty string if provided`);
+  }
+  
+  if (poem.hoverText !== undefined) {
+    if (!Array.isArray(poem.hoverText)) {
+      throw new Error(`Invalid poem format in ${filename}: hoverText must be an array if provided`);
+    }
+    if (poem.hoverText.some(text => typeof text !== 'string' || text.trim() === '')) {
+      throw new Error(`Invalid poem format in ${filename}: all hoverText entries must be non-empty strings`);
+    }
+  }
+  
+  if (poem.untitled !== undefined && typeof poem.untitled !== 'boolean') {
+    throw new Error(`Invalid poem format in ${filename}: untitled must be a boolean if provided`);
+  }
+  
+  // Check for reasonable length limits (prevent extremely long content)
+  const MAX_LENGTH = 100000; // 100KB per field
+  if (poem.original.length > MAX_LENGTH) {
+    throw new Error(`Invalid poem format in ${filename}: original text exceeds maximum length`);
+  }
+  if (poem.translation.length > MAX_LENGTH) {
+    throw new Error(`Invalid poem format in ${filename}: translation text exceeds maximum length`);
+  }
+}
+
+/**
+ * Loads and parses a single YAML poem file
+ * @param {string} filename - The filename of the YAML file to load
+ * @returns {Promise<Object>} The parsed poem object
+ * @throws {Error} If loading or parsing fails
+ */
+async function loadSinglePoem(filename) {
+  if (typeof filename !== 'string' || !filename.endsWith('.yaml')) {
+    throw new Error(`Invalid filename in index.json: ${filename}`);
+  }
+  
+  const yamlResponse = await fetch(`poems/${filename}`);
+  if (!yamlResponse.ok) {
+    throw new Error(`Failed to load ${filename}: ${yamlResponse.status} ${yamlResponse.statusText}`);
+  }
+  const yamlText = await yamlResponse.text();
+  
+  if (typeof jsyaml === 'undefined' || !jsyaml.load) {
+    throw new Error('js-yaml library not loaded. Please check the script tag.');
+  }
+  
+  let poem;
+  try {
+    poem = jsyaml.load(yamlText);
+  } catch (yamlError) {
+    throw new Error(`Failed to parse YAML in ${filename}: ${yamlError.message}`);
+  }
+  
+  validatePoem(poem, filename);
+  
+  return poem;
+}
+
+/**
+ * Loads poems from YAML files with graceful error handling
+ * Loads available poems even if some fail to load
+ */
 async function loadPoems() {
   try {
     // Load the index.json to get the list of YAML files
@@ -877,47 +987,49 @@ async function loadPoems() {
       throw new Error('No poems listed in index.json');
     }
     
-    // Load and parse each YAML file
-    const poemPromises = indexData.poems.map(async (filename) => {
-      if (typeof filename !== 'string' || !filename.endsWith('.yaml')) {
-        throw new Error(`Invalid filename in index.json: ${filename}`);
+    // Load and parse each YAML file with error recovery
+    const poemPromises = indexData.poems.map(filename => 
+      loadSinglePoem(filename).catch(error => {
+        console.error(`Failed to load poem ${filename}:`, error);
+        return { error: true, filename, message: error.message };
+      })
+    );
+    
+    // Wait for all poems to load (some may fail)
+    const results = await Promise.allSettled(poemPromises);
+    
+    // Separate successful and failed poems
+    const successfulPoems = [];
+    const failedPoems = [];
+    
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        const poem = result.value;
+        if (poem.error) {
+          failedPoems.push({ filename: indexData.poems[index], error: poem.message });
+        } else {
+          successfulPoems.push(poem);
+        }
+      } else {
+        failedPoems.push({ filename: indexData.poems[index], error: result.reason?.message || 'Unknown error' });
       }
-      
-      const yamlResponse = await fetch(`poems/${filename}`);
-      if (!yamlResponse.ok) {
-        throw new Error(`Failed to load ${filename}: ${yamlResponse.status} ${yamlResponse.statusText}`);
-      }
-      const yamlText = await yamlResponse.text();
-      
-      if (typeof jsyaml === 'undefined' || !jsyaml.load) {
-        throw new Error('js-yaml library not loaded. Please check the script tag.');
-      }
-      
-      const poem = jsyaml.load(yamlText);
-      if (!poem || typeof poem !== 'object') {
-        throw new Error(`Invalid poem format in ${filename}: not an object`);
-      }
-      
-      if (!poem.title || typeof poem.title !== 'string') {
-        throw new Error(`Invalid poem format in ${filename}: missing or invalid title`);
-      }
-      
-      if (!poem.original || typeof poem.original !== 'string') {
-        throw new Error(`Invalid poem format in ${filename}: missing or invalid original`);
-      }
-      
-      if (!poem.translation || typeof poem.translation !== 'string') {
-        throw new Error(`Invalid poem format in ${filename}: missing or invalid translation`);
-      }
-      
-      return poem;
     });
     
-    // Wait for all poems to load
-    poems = await Promise.all(poemPromises);
+    // Log failed poems for debugging
+    if (failedPoems.length > 0) {
+      console.warn(`${failedPoems.length} poem(s) failed to load:`, failedPoems);
+    }
     
-    if (poems.length === 0) {
-      throw new Error('No poems loaded successfully');
+    if (successfulPoems.length === 0) {
+      throw new Error('No poems loaded successfully. Please check the console for details.');
+    }
+    
+    poems = successfulPoems;
+    
+    // Show warning if some poems failed
+    if (failedPoems.length > 0 && pagesContainer) {
+      const warningMessage = `${successfulPoems.length} poem(s) loaded successfully. ${failedPoems.length} poem(s) failed to load.`;
+      console.warn(warningMessage);
     }
     
     // Initialize the notebook once all poems are loaded
@@ -927,13 +1039,15 @@ async function loadPoems() {
     setupScrollShadows();
   } catch (error) {
     console.error('Error loading poems:', error);
-    const errorMessage = error instanceof Error ? escapeHtml(error.message) : 'Unknown error';
+    const userMessage = 'Unable to load poems. Please refresh the page or contact support if the problem persists.';
+    const technicalMessage = error instanceof Error ? escapeHtml(error.message) : 'Unknown error';
     if (pagesContainer) {
       pagesContainer.innerHTML = `
         <div style="padding: 2rem; text-align: center; color: var(--ink);">
           <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">Error loading poems</p>
-          <p style="font-size: 0.9rem; color: var(--text-tertiary);">${errorMessage}</p>
-          <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--text-tertiary);">Please check the console for details.</p>
+          <p style="font-size: 0.9rem; color: var(--text-tertiary);">${escapeHtml(userMessage)}</p>
+          <p style="font-size: 0.85rem; margin-top: 1rem; color: var(--text-tertiary);">Technical details: ${technicalMessage}</p>
+          <p style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-tertiary);">Please check the console for more information.</p>
         </div>
       `;
     }
