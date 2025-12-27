@@ -257,7 +257,6 @@ function renderPoems() {
 
     const h2 = document.createElement('h2');
     h2.textContent = poem.title;
-    h2.setAttribute('lang', 'sd'); // Sindhi language
     header.appendChild(h2);
     
     // Add phonetic title if available
@@ -436,7 +435,6 @@ function renderPoems() {
       if (i < originalHtmlLines.length && originalHtmlLines[i].trim()) {
         const originalLine = document.createElement('div');
         originalLine.className = 'original-line';
-        originalLine.setAttribute('lang', 'sd'); // Sindhi language
         originalLine.innerHTML = originalHtmlLines[i];
         originalLineContainer.appendChild(originalLine);
         
@@ -452,7 +450,6 @@ function renderPoems() {
         // Fallback: if HTML parsing didn't produce a line, use the original line
         const originalLine = document.createElement('div');
         originalLine.className = 'original-line';
-        originalLine.setAttribute('lang', 'sd'); // Sindhi language
         originalLine.textContent = originalLines[i].trim();
         originalLineContainer.appendChild(originalLine);
         
@@ -490,7 +487,6 @@ function renderPoems() {
     // For non-translation-visible state, show only original
     const original = document.createElement('p');
     original.className = 'original';
-    original.setAttribute('lang', 'sd'); // Sindhi language
     
     // Use the already-parsed original HTML (allows markers to span multiple lines)
     // Replace newlines with <br /> tags for display
