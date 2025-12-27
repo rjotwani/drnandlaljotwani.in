@@ -4,8 +4,8 @@ titlePhonetic: "Ḍapu Athmu"
 original: |
   डपु अथमु ..
   
-  मुद्दत खां मुंहिंजी तबीअत,
-  तमामु फ़िक्रमंद रही आहे -
+  {मुद्दत खां मुंहिंजी तबीअत,
+  तमामु फ़िक्रमंद रही आहे -}
   डपु अथमु मुंहिंजी मिठिड़ी ॿोली,
   ॾुख्यो साहु खणी रही आहे.
   
@@ -52,11 +52,14 @@ original: |
   कोमल कमल कली, दाहं खणी आई आहे.
   
   डपु अथमु ..
+hoverText:
+  - "In an alternate version, this line was: 'मुद्दत खां मुंहिंजी दिल, फ़िक्रमंदु रही आहे -'"
+  - "In an alternate version, this line was: 'For so long now, my heart has gone on, heavy with worry—'"
 translation: |
   I have fears…
 
-  For ages, my entire being,
-  has been weighed down with worry -
+  {For ages, my entire being,
+  has been weighed down with worry —}
   I have fears that my sweet mother-tongue,
   is finding it hard to breathe.
 
@@ -71,7 +74,7 @@ translation: |
 
   It is not that strangers have done this deed,
   there sits a Vibhishana [traitor] in our home,
-  the gardener, the guardian of this garden -
+  the gardener, the guardian of this garden—
   it is he himself who has set the garden on fire!
 
   I have fears…

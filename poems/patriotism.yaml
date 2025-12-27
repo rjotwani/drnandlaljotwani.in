@@ -47,11 +47,14 @@ original: |
   तव्हां जी हर हरकत खे 
   असां कंदा सीं बेकारु
 
-  धूओं ईएं त न उभिरंदो आहे 
-  का त न्याणी किथे अघाणी हूंदी 
+  {धूओं ईएं त न उभिरंदो आहे 
+  का त न्याणी किथे अघाणी हूंदी }
   
   अमर शहीद हेमू कालाणी - 
   वंदे मातरम्. वंदे मातरम्.
+hoverText:
+  - "It is unclear if this two-line fragment is meant to be a part of this poem."
+  - "It is unclear if this two-line fragment is meant to be a part of this poem."
 translation: |
   What kind of person is he
   who has no respect for his country,
@@ -98,8 +101,8 @@ translation: |
   Your every move—
   we will render it powerless.
 
-  Smoke does not rise without a reason,
-  perhaps somewhere someone is burning.
+  {Smoke does not rise without a reason,
+  perhaps somewhere someone is burning.}
   
   To the immortal martyr Hemu Kalani—
   Vande Mātaram. Vande Mātaram.

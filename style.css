@@ -425,7 +425,7 @@ body.safari .page.active {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding-right: clamp(0.3rem, 1vw, 0.9rem);
+  padding-right: clamp(0.3rem, 1vw, 0.55rem);
   scrollbar-gutter: stable both-edges;
   position: relative;
 }
@@ -662,6 +662,46 @@ body.safari .page.active {
   display: block;
   margin-bottom: 0.2em;
 }
+
+/* ============================================
+   Alternate Version Tooltips
+   ============================================ */
+.has-alternate-version {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted var(--accent);
+  transition: background-color 150ms ease, border-bottom-color 150ms ease, color 150ms ease;
+  color: var(--accent-dark);
+}
+
+.has-alternate-version:hover,
+.has-alternate-version.marker-hovered {
+  background-color: rgba(190, 140, 99, 0.1);
+  border-bottom-color: var(--accent-dark);
+  color: var(--accent);
+}
+
+.alternate-version-tooltip {
+  position: absolute;
+  display: none;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-sm);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-width: min(300px, 80vw);
+  z-index: 10000;
+  pointer-events: none;
+  transform: translateX(-50%);
+  font-family: "Spectral", serif;
+  border: 1px solid var(--border-light);
+}
+
+/* Arrow removed - no arrow styles needed */
 
 /* ============================================
    Page Footer

@@ -65,6 +65,96 @@ function splitIntoLines(text) {
   return normalized.split('\n');
 }
 
+// Parse text with {} markers and return processed HTML with hover spans
+// Also returns marker positions for line-by-line rendering
+// Returns: { html: string, markerPositions: Array<{start: number, end: number, hoverText: string, markerId: number}> }
+function parseTextWithMarkers(text, hoverTextArray) {
+  if (typeof text !== 'string' || !hoverTextArray || !Array.isArray(hoverTextArray)) {
+    return { html: escapeHtml(text), markerPositions: [] };
+  }
+  
+  let hoverIndex = 0;
+  const markerPositions = [];
+  const parts = [];
+  let lastIndex = 0;
+  
+  // Find all {} markers - the regex already supports multi-line markers
+  const markerRegex = /\{([^}]+)\}/gs; // 's' flag makes . match newlines, but we use [^}] which already matches newlines
+  let match;
+  
+  while ((match = markerRegex.exec(text)) !== null) {
+    // Add text before the marker (this preserves any spaces before the {)
+    const textBefore = text.substring(lastIndex, match.index);
+    if (textBefore.length > 0) {
+      parts.push({
+        type: 'text',
+        content: textBefore
+      });
+    }
+    
+    // Add the marked text (content inside {}, the braces themselves are removed)
+    const markedText = match[1];
+    const markerStart = match.index;
+    const markerEnd = match.index + match[0].length;
+    
+    // Only add as marker if we have hoverText, otherwise just add as regular text (without braces)
+    if (hoverIndex < hoverTextArray.length) {
+      const hoverText = hoverTextArray[hoverIndex];
+      
+      parts.push({
+        type: 'marker',
+        content: markedText,
+        hoverText: hoverText,
+        start: markerStart,
+        end: markerEnd
+      });
+      
+      markerPositions.push({
+        start: markerStart,
+        end: markerEnd,
+        hoverText: hoverText,
+        markerId: hoverIndex // Use hoverIndex as unique marker ID (will be prefixed per text type)
+      });
+      
+      hoverIndex++;
+    } else {
+      // No more hoverText entries - just add the text without braces
+      parts.push({
+        type: 'text',
+        content: markedText
+      });
+    }
+    
+    // Move past the entire marker including the closing }
+    lastIndex = markerEnd;
+  }
+  
+  // Add remaining text after last marker
+  if (lastIndex < text.length) {
+    parts.push({
+      type: 'text',
+      content: text.substring(lastIndex)
+    });
+  }
+  
+  // Build HTML, preserving newlines so we can split it back into lines later
+  // Note: marker IDs use temporary "marker-" prefix, replaced with text-type prefix in renderPoems
+  let markerIndex = 0;
+  const html = parts.map(part => {
+    if (part.type === 'marker') {
+      const markerId = markerPositions[markerIndex++]?.markerId;
+      const markerIdAttr = markerId !== undefined ? ` data-marker-id="marker-${markerId}"` : '';
+      const escapedText = escapeHtml(part.content);
+      const escapedHover = escapeHtml(part.hoverText);
+      return `<span class="has-alternate-version" data-alternate-note="${escapedHover}"${markerIdAttr} title="Hover to see alternate version">${escapedText}</span>`;
+    } else {
+      return escapeHtml(part.content);
+    }
+  }).join('');
+  
+  return { html, markerPositions };
+}
+
 // Convert newlines to <br /> tags, preserving paragraph breaks (for non-grid layout)
 function formatText(text) {
   if (typeof text !== 'string') return '';
@@ -190,13 +280,140 @@ function renderPoems() {
     const poemBody = document.createElement('div');
     poemBody.className = 'poem-body';
 
-    // Split texts into lines for line-by-line display
+    // Get hoverText array from poem
+    const hoverTextArray = poem.hoverText && Array.isArray(poem.hoverText) ? poem.hoverText : [];
+    
+    // Parse full texts with markers first (allows markers to span multiple lines)
+    const originalParsed = parseTextWithMarkers(poem.original, hoverTextArray);
+    let hoverIndexUsed = originalParsed.markerPositions.length;
+    
+    const phoneticParsed = poem.phonetic ? parseTextWithMarkers(poem.phonetic, hoverTextArray.slice(hoverIndexUsed)) : { html: '', markerPositions: [] };
+    hoverIndexUsed += phoneticParsed.markerPositions.length;
+    
+    const translationParsed = parseTextWithMarkers(poem.translation, hoverTextArray.slice(hoverIndexUsed));
+    
+    // Render lines with markers that may span multiple lines
+    // markerIdPrefix ensures unique IDs across different text types (original, phonetic, translation)
+    function renderLinesWithMarkers(text, markerPositions, markerIdPrefix = '') {
+      const lines = splitIntoLines(text);
+      if (lines.length === 0) return [''];
+      
+      const htmlLines = [];
+      
+      // Calculate cumulative character positions for each line in the original text
+      // We need to account for newlines when calculating positions
+      let cumulativePos = 0;
+      const lineRanges = lines.map((line, index) => {
+        const start = cumulativePos;
+        const end = start + line.length;
+        // Move past this line and its newline (except for the last line)
+        cumulativePos = end + (index < lines.length - 1 ? 1 : 0);
+        return { start, end, line, index, markers: [] };
+      });
+      
+      // First pass: identify which markers span which lines
+      for (let i = 0; i < lineRanges.length; i++) {
+        const { start, end } = lineRanges[i];
+        
+        for (const marker of markerPositions) {
+          // Check if marker overlaps with this line
+          if (marker.start < end && marker.end > start) {
+            const isStart = marker.start >= start && marker.start < end;
+            const isEnd = marker.end > start && marker.end <= end;
+            
+            // Calculate positions within this line
+            const markerStartInLine = isStart ? marker.start - start : 0;
+            const markerEndInLine = isEnd ? marker.end - start : end - start;
+            
+            lineRanges[i].markers.push({
+              ...marker,
+              isStart,
+              isEnd,
+              markerStartInLine,
+              markerEndInLine
+            });
+          }
+        }
+        
+        // Sort markers by start position within the line
+        lineRanges[i].markers.sort((a, b) => a.markerStartInLine - b.markerStartInLine);
+      }
+      
+      // Second pass: render each line with proper marker tags
+      for (let i = 0; i < lineRanges.length; i++) {
+        const { line, markers } = lineRanges[i];
+        const parts = [];
+        let currentPos = 0;
+        
+        for (const marker of markers) {
+          // Add text before marker
+          if (marker.markerStartInLine > currentPos) {
+            const beforeText = line.substring(currentPos, marker.markerStartInLine);
+            if (beforeText) {
+              parts.push({ type: 'text', content: beforeText });
+            }
+          }
+          
+          // Extract marker text (remove braces)
+          let markerText = line.substring(marker.markerStartInLine, marker.markerEndInLine);
+          if (marker.isStart && markerText.startsWith('{')) markerText = markerText.substring(1);
+          if (marker.isEnd && markerText.endsWith('}')) markerText = markerText.slice(0, -1);
+          
+          if (markerText) {
+            parts.push({
+              type: 'marker',
+              content: markerText,
+              hoverText: marker.hoverText,
+              markerId: marker.markerId
+            });
+          }
+          
+          // Move past this marker segment
+          currentPos = marker.markerEndInLine + (marker.isEnd && line[marker.markerEndInLine] === '}' ? 1 : 0);
+        }
+        
+        // Add remaining text after last marker
+        if (currentPos < line.length) {
+          const afterText = line.substring(currentPos);
+          if (afterText) {
+            parts.push({ type: 'text', content: afterText });
+          }
+        }
+        
+        // Build HTML for this line
+        const html = parts.map(part => {
+          if (part.type === 'marker') {
+            const escapedText = escapeHtml(part.content);
+            const escapedHover = escapeHtml(part.hoverText);
+            const fullMarkerId = part.markerId !== undefined ? `${markerIdPrefix}${part.markerId}` : '';
+            const markerIdAttr = fullMarkerId ? ` data-marker-id="${fullMarkerId}"` : '';
+            return `<span class="has-alternate-version" data-alternate-note="${escapedHover}"${markerIdAttr} title="Hover to see alternate version">${escapedText}</span>`;
+          } else {
+            return escapeHtml(part.content);
+          }
+        }).join('');
+        htmlLines.push(html);
+      }
+      
+      return htmlLines;
+    }
+    
+    // Use renderLinesWithMarkers which properly handles multi-line markers
+    // It works with the original text but removes braces and applies spans correctly
+    // Prefixes ensure marker IDs are unique across text types (orig-, phon-, trans-)
+    const originalHtmlLines = renderLinesWithMarkers(poem.original, originalParsed.markerPositions || [], 'orig-');
+    const phoneticHtmlLines = poem.phonetic && phoneticParsed.markerPositions ? renderLinesWithMarkers(poem.phonetic, phoneticParsed.markerPositions, 'phon-') : [];
+    const translationHtmlLines = translationParsed.markerPositions && translationParsed.markerPositions.length > 0 
+      ? renderLinesWithMarkers(poem.translation, translationParsed.markerPositions, 'trans-')
+      : splitIntoLines(poem.translation).map(line => escapeHtml(line));
+    
+    // Also get the original line structure for reference
     const originalLines = splitIntoLines(poem.original);
     const phoneticLines = poem.phonetic ? splitIntoLines(poem.phonetic) : [];
     const translationLines = splitIntoLines(poem.translation);
     
     // Determine the maximum number of lines
-    const maxLines = Math.max(originalLines.length, translationLines.length);
+    const maxLines = Math.max(originalLines.length, translationLines.length, originalHtmlLines.length, translationHtmlLines.length);
     
     // Create a grid container for line pairs
     const stanzaGrid = document.createElement('div');
@@ -215,13 +432,26 @@ function renderPoems() {
       originalLineContainer.className = 'original-line-container';
       
       // Add original Sindhi line
-      if (i < originalLines.length && originalLines[i].trim()) {
+      if (i < originalHtmlLines.length && originalHtmlLines[i].trim()) {
+        const originalLine = document.createElement('div');
+        originalLine.className = 'original-line';
+        originalLine.innerHTML = originalHtmlLines[i];
+        originalLineContainer.appendChild(originalLine);
+        
+        // Add phonetic line underneath if available
+        if (i < phoneticHtmlLines.length && phoneticHtmlLines[i].trim()) {
+          const phoneticLine = document.createElement('div');
+          phoneticLine.className = 'phonetic-line';
+          phoneticLine.innerHTML = phoneticHtmlLines[i];
+          originalLineContainer.appendChild(phoneticLine);
+        }
+      } else if (i < originalLines.length && originalLines[i].trim()) {
+        // Fallback: if HTML parsing didn't produce a line, use the original line
         const originalLine = document.createElement('div');
         originalLine.className = 'original-line';
         originalLine.textContent = originalLines[i].trim();
         originalLineContainer.appendChild(originalLine);
         
-        // Add phonetic line underneath if available
         if (i < phoneticLines.length && phoneticLines[i].trim()) {
           const phoneticLine = document.createElement('div');
           phoneticLine.className = 'phonetic-line';
@@ -239,7 +469,9 @@ function renderPoems() {
       // Translation line cell
       const translationCell = document.createElement('div');
       translationCell.className = 'stanza-cell translation';
-      if (i < translationLines.length && translationLines[i].trim()) {
+      if (i < translationHtmlLines.length && translationHtmlLines[i].trim()) {
+        translationCell.innerHTML = translationHtmlLines[i];
+      } else if (i < translationLines.length && translationLines[i].trim()) {
         translationCell.textContent = translationLines[i].trim();
       } else {
         translationCell.innerHTML = '&nbsp;';
@@ -252,7 +484,18 @@ function renderPoems() {
     // For non-translation-visible state, show only original
     const original = document.createElement('p');
     original.className = 'original';
-    original.innerHTML = formatText(poem.original);
+    
+    // Use the already-parsed original HTML (allows markers to span multiple lines)
+    // Replace newlines with <br /> tags for display
+    // For non-grid view, apply prefix to marker IDs in the HTML
+    let originalHtmlWithBreaks = originalParsed.html;
+    // Replace marker IDs with prefixed versions
+    originalHtmlWithBreaks = originalHtmlWithBreaks.replace(/data-marker-id="marker-(\d+)"/g, (match, id) => {
+      return `data-marker-id="orig-${id}"`;
+    });
+    originalHtmlWithBreaks = originalHtmlWithBreaks.replace(/\n/g, '<br />');
+    original.innerHTML = originalHtmlWithBreaks;
+    
     poemBody.appendChild(original);
     
     // Add the grid (hidden by default, shown when translation is visible)
@@ -294,6 +537,7 @@ function renderPoems() {
   // Setup scroll shadows after rendering
   requestAnimationFrame(() => {
     setupScrollShadows();
+    setupAlternateVersionTooltips();
   });
 }
 
@@ -380,6 +624,147 @@ function setupScrollShadows() {
   });
 }
 
+// Setup tooltips for lines with alternate versions
+function setupAlternateVersionTooltips() {
+  // Create a single tooltip element that will be reused
+  let tooltip = document.getElementById('alternate-version-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'alternate-version-tooltip';
+    tooltip.className = 'alternate-version-tooltip';
+    tooltip.setAttribute('role', 'tooltip');
+    tooltip.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tooltip);
+  }
+  
+  // Helper function to toggle hover class on related spans
+  function toggleMarkerHover(markerId, page, add) {
+    if (!markerId || !page) return;
+    const relatedSpans = page.querySelectorAll(`[data-marker-id="${markerId}"]`);
+    relatedSpans.forEach(span => {
+      span.classList[add ? 'add' : 'remove']('marker-hovered');
+    });
+  }
+  
+  // Get all elements with alternate versions
+  const elementsWithAlternates = document.querySelectorAll('.has-alternate-version');
+  
+  elementsWithAlternates.forEach((element) => {
+    const note = element.getAttribute('data-alternate-note');
+    if (!note || element.dataset.tooltipSetup === 'true') return;
+    
+    element.dataset.tooltipSetup = 'true';
+    const page = element.closest('.page');
+    
+    // Mouse hover handlers
+    element.addEventListener('mouseenter', (e) => {
+      const markerId = e.target.getAttribute('data-marker-id');
+      toggleMarkerHover(markerId, page, true);
+      showTooltip(e.target, note, tooltip);
+    });
+    
+    element.addEventListener('mouseleave', () => {
+      const markerId = element.getAttribute('data-marker-id');
+      toggleMarkerHover(markerId, page, false);
+      hideTooltip(tooltip);
+    });
+    
+    // Touch handler
+    element.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const markerId = e.target.getAttribute('data-marker-id');
+      const isVisible = tooltip.style.display === 'block';
+      toggleMarkerHover(markerId, page, !isVisible);
+      if (isVisible) {
+        hideTooltip(tooltip);
+      } else {
+        showTooltip(e.target, note, tooltip);
+      }
+    });
+  });
+}
+
+// Show tooltip at the position of the element
+function showTooltip(element, note, tooltip) {
+  tooltip.textContent = note;
+  tooltip.setAttribute('aria-hidden', 'false');
+  tooltip.style.display = 'block';
+  
+  // Force a reflow to get accurate dimensions
+  tooltip.offsetHeight;
+  
+  // Position tooltip
+  const rect = element.getBoundingClientRect();
+  const scrollTop = getScrollTop();
+  const scrollLeft = window.scrollX ?? document.documentElement.scrollLeft ?? 0;
+  const tooltipRect = tooltip.getBoundingClientRect();
+  
+  // Position tooltip above the element by default, or below if not enough space
+  const tooltipHeight = tooltipRect.height;
+  const spaceAbove = rect.top;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const padding = 12;
+  
+  let top, left, position;
+  
+  // Determine if tooltip should be above or below
+  if (spaceAbove > tooltipHeight + padding) {
+    // Position above
+    position = 'above';
+    top = rect.top + scrollTop - tooltipHeight - padding;
+  } else {
+    // Position below
+    position = 'below';
+    top = rect.bottom + scrollTop + padding;
+  }
+  
+  // Center horizontally relative to element
+  left = rect.left + scrollLeft + (rect.width / 2);
+  
+  tooltip.style.top = `${top}px`;
+  tooltip.style.left = `${left}px`;
+  tooltip.style.transform = 'translateX(-50%)';
+  tooltip.setAttribute('data-position', position);
+  
+  // Adjust position to keep tooltip in viewport
+  requestAnimationFrame(() => {
+    const finalRect = tooltip.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const margin = 10;
+    
+    let adjustedLeft = left;
+    let adjustedTop = top;
+    
+    // Adjust horizontal position
+    if (finalRect.left < margin) {
+      adjustedLeft = scrollLeft + margin + (finalRect.width / 2);
+      tooltip.style.transform = 'translateX(0)';
+    } else if (finalRect.right > viewportWidth - margin) {
+      adjustedLeft = scrollLeft + viewportWidth - margin - (finalRect.width / 2);
+      tooltip.style.transform = 'translateX(0)';
+    }
+    
+    // Adjust vertical position if needed
+    if (finalRect.top < margin) {
+      adjustedTop = scrollTop + margin;
+      tooltip.setAttribute('data-position', 'below');
+    } else if (finalRect.bottom > viewportHeight - margin) {
+      adjustedTop = scrollTop + viewportHeight - margin - tooltipHeight;
+      tooltip.setAttribute('data-position', 'above');
+    }
+    
+    tooltip.style.top = `${adjustedTop}px`;
+    tooltip.style.left = `${adjustedLeft}px`;
+  });
+}
+
+// Hide tooltip
+function hideTooltip(tooltip) {
+  tooltip.style.display = 'none';
+  tooltip.setAttribute('aria-hidden', 'true');
+}
+
 function updateFloatingButton() {
   if (floatingTranslationButton && isMobileDevice()) {
     const activePage = pages[currentPage];
@@ -423,6 +808,8 @@ function setupTranslationToggles() {
       if (activePage) {
         const isVisible = activePage.classList.toggle('translation-visible');
         floatingTranslationButton.textContent = isVisible ? 'Hide translation' : 'Show translation';
+        // Re-setup tooltips after DOM changes
+        setTimeout(() => setupAlternateVersionTooltips(), TRANSLATION_TOGGLE_UPDATE_DELAY);
       }
     };
     
@@ -458,7 +845,10 @@ function setupTranslationToggles() {
         // Update scroll shadow after translation toggle (content height may change)
         const pageContent = page.querySelector('.page-content');
         if (pageContent) {
-          setTimeout(() => updateScrollShadow(pageContent), TRANSLATION_TOGGLE_UPDATE_DELAY);
+          setTimeout(() => {
+            updateScrollShadow(pageContent);
+            setupAlternateVersionTooltips(); // Re-setup tooltips after DOM changes
+          }, TRANSLATION_TOGGLE_UPDATE_DELAY);
         }
       };
       
