@@ -607,6 +607,18 @@ body.safari .page.active {
 
 .original-line {
   font-family: "Aref Ruqaa Ink", "Lateef", serif;
+  /* Disable browser spell-check styling on mobile */
+  -webkit-text-decoration-skip: none;
+  text-decoration-skip: none;
+}
+
+/* Prevent iOS Safari from applying spell-check styling to Sindhi text */
+[lang="sd"],
+[lang="sd"] * {
+  -webkit-text-decoration-skip-ink: none;
+  text-decoration-skip-ink: none;
+  /* Override any browser spell-check styling */
+  color: inherit !important;
 }
 
 .phonetic-line {
@@ -655,6 +667,9 @@ body.safari .page.active {
   text-align: left;
   padding: 0;
   margin: 0;
+  /* Disable browser spell-check styling on mobile */
+  -webkit-text-decoration-skip: none;
+  text-decoration-skip: none;
 }
 
 .original br {
