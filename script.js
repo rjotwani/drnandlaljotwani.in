@@ -473,13 +473,20 @@ function renderPoems() {
       const translationCell = document.createElement('div');
       translationCell.className = 'stanza-cell translation';
       translationCell.setAttribute('lang', 'en'); // English translation
+      
+      // Wrap content in a span to maintain inline flow within flex container
+      const translationContent = document.createElement('span');
+      translationContent.className = 'translation-line-content';
+      
       if (i < translationHtmlLines.length && translationHtmlLines[i].trim()) {
-        translationCell.innerHTML = translationHtmlLines[i];
+        translationContent.innerHTML = translationHtmlLines[i];
       } else if (i < translationLines.length && translationLines[i].trim()) {
-        translationCell.textContent = translationLines[i].trim();
+        translationContent.textContent = translationLines[i].trim();
       } else {
-        translationCell.innerHTML = '&nbsp;';
+        translationContent.innerHTML = '&nbsp;';
       }
+      
+      translationCell.appendChild(translationContent);
       stanzaRow.appendChild(translationCell);
       
       stanzaGrid.appendChild(stanzaRow);

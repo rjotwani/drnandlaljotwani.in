@@ -623,7 +623,7 @@ body.safari .page.active {
 
 .stanza-cell.original br {
   line-height: 0.5;
-  margin-bottom: 0.15em;
+  margin-bottom: 0.25em;
   height: 0.5em;
   display: block;
 }
@@ -640,11 +640,51 @@ body.safari .page.active {
   word-break: normal;
   overflow-wrap: break-word;
   hyphens: none;
+  /* Ensure content flows as a single text block */
+  min-width: 0;
+}
+
+/* Wrapper for translation content to maintain inline flow */
+.translation-line-content {
+  display: inline-block;
+  width: 100%;
+  white-space: pre-wrap;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* On mobile, ensure tooltip spans flow naturally and don't create visual column breaks */
+@media (max-width: 700px),
+       (max-width: 1000px) and (max-height: 500px) and (orientation: landscape) {
+  /* Ensure translation content wrapper maintains inline flow */
+  .translation-line-content {
+    display: inline-block;
+    width: 100%;
+  }
+  
+  /* Ensure tooltip spans remain truly inline and don't break line flow */
+  .stanza-cell .has-alternate-version {
+    display: inline !important;
+    position: relative;
+    /* Prevent any layout shifts */
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Ensure natural text flow */
+    vertical-align: baseline;
+    line-height: inherit;
+    /* Prevent the span from creating visual separation */
+    box-sizing: border-box;
+  }
+  
+  /* Adjust underline position on mobile to prevent overlap with next line */
+  .stanza-cell .has-alternate-version::after {
+    bottom: 0.1em;
+  }
 }
 
 .stanza-cell.translation br {
   line-height: 0.5;
-  margin-bottom: 0.15em;
+  margin-bottom: 0.25em;
   height: 0.5em;
   display: block;
 }
@@ -671,17 +711,34 @@ body.safari .page.active {
   display: inline;
   position: relative;
   cursor: help;
-  border-bottom: 1px dotted var(--accent);
-  transition: background-color 150ms ease, border-bottom-color 150ms ease, color 150ms ease;
+  border-bottom: none;
+  transition: background-color 150ms ease, color 150ms ease;
   color: var(--accent-dark);
   vertical-align: baseline;
+  /* Use pseudo-element for underline to control position */
+}
+
+.has-alternate-version::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.05em;
+  height: 1px;
+  border-bottom: 1px dotted var(--accent);
+  transition: border-bottom-color 150ms ease;
+  pointer-events: none;
 }
 
 .has-alternate-version:hover,
 .has-alternate-version.marker-hovered {
   background-color: rgba(190, 140, 99, 0.1);
-  border-bottom-color: var(--accent-dark);
   color: var(--accent);
+}
+
+.has-alternate-version:hover::after,
+.has-alternate-version.marker-hovered::after {
+  border-bottom-color: var(--accent-dark);
 }
 
 .alternate-version-tooltip {
