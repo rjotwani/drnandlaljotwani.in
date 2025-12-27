@@ -995,94 +995,92 @@ function validatePoem(poem, filename) {
 }
 
 /**
- * Loads and parses a single YAML poem file
- * @param {string} filename - The filename of the YAML file to load
- * @returns {Promise<Object>} The parsed poem object
- * @throws {Error} If loading or parsing fails
+ * Transforms a poem from JSON format (with nested text arrays) to the format expected by the rendering code
+ * @param {Object} jsonPoem - The poem object from JSON
+ * @returns {Object} The transformed poem object
  */
-async function loadSinglePoem(filename) {
-  if (typeof filename !== 'string' || !filename.endsWith('.yaml')) {
-    throw new Error(`Invalid filename in index.json: ${filename}`);
+function transformPoemFromJson(jsonPoem) {
+  if (!jsonPoem || typeof jsonPoem !== 'object') {
+    throw new Error('Invalid poem object');
   }
   
-  const yamlResponse = await fetch(`poems/${filename}`);
-  if (!yamlResponse.ok) {
-    throw new Error(`Failed to load ${filename}: ${yamlResponse.status} ${yamlResponse.statusText}`);
+  const transformed = {
+    title: jsonPoem.title,
+    titleTranslation: jsonPoem.titleTranslation,
+    titlePhonetic: jsonPoem.titlePhonetic,
+    untitled: jsonPoem.untitled,
+    hoverText: jsonPoem.hoverText
+  };
+  
+  // Convert text arrays to strings (join with \n)
+  if (jsonPoem.text && typeof jsonPoem.text === 'object') {
+    if (Array.isArray(jsonPoem.text.original)) {
+      transformed.original = jsonPoem.text.original.join('\n');
+    } else {
+      throw new Error('Missing or invalid original text array');
+    }
+    
+    if (Array.isArray(jsonPoem.text.translation)) {
+      transformed.translation = jsonPoem.text.translation.join('\n');
+    } else {
+      throw new Error('Missing or invalid translation text array');
+    }
+    
+    if (Array.isArray(jsonPoem.text.phonetic)) {
+      transformed.phonetic = jsonPoem.text.phonetic.join('\n');
+    }
+    // phonetic is optional, so we don't throw if it's missing
+  } else {
+    throw new Error('Missing text object in poem');
   }
-  const yamlText = await yamlResponse.text();
   
-  if (typeof jsyaml === 'undefined' || !jsyaml.load) {
-    throw new Error('js-yaml library not loaded. Please check the script tag.');
-  }
-  
-  let poem;
-  try {
-    poem = jsyaml.load(yamlText);
-  } catch (yamlError) {
-    throw new Error(`Failed to parse YAML in ${filename}: ${yamlError.message}`);
-  }
-  
-  validatePoem(poem, filename);
-  
-  return poem;
+  return transformed;
 }
 
 /**
- * Loads poems from YAML files with graceful error handling
+ * Loads poems from poems.json with graceful error handling
  * Loads available poems even if some fail to load
  */
 async function loadPoems() {
   try {
-    // Load the index.json to get the list of YAML files
-    const indexResponse = await fetch('poems/index.json');
-    if (!indexResponse.ok) {
-      throw new Error(`Failed to load index.json: ${indexResponse.status} ${indexResponse.statusText}`);
+    // Load the poems.json file
+    const poemsResponse = await fetch('poems.json');
+    if (!poemsResponse.ok) {
+      throw new Error(`Failed to load poems.json: ${poemsResponse.status} ${poemsResponse.statusText}`);
     }
-    const indexData = await indexResponse.json();
+    const poemsData = await poemsResponse.json();
     
-    if (!indexData.poems || !Array.isArray(indexData.poems)) {
-      throw new Error('Invalid index.json format: missing or invalid poems array');
-    }
-    
-    if (indexData.poems.length === 0) {
-      throw new Error('No poems listed in index.json');
+    if (!poemsData.poems || !Array.isArray(poemsData.poems)) {
+      throw new Error('Invalid poems.json format: missing or invalid poems array');
     }
     
-    // Load and parse each YAML file with error recovery
-    const poemPromises = indexData.poems.map(filename => 
-      loadSinglePoem(filename).catch(error => {
-        console.error(`Failed to load poem ${filename}:`, error);
-        return { error: true, filename, message: error.message };
-      })
-    );
+    if (poemsData.poems.length === 0) {
+      throw new Error('No poems found in poems.json');
+    }
     
-    // Wait for all poems to load (some may fail)
-    const results = await Promise.allSettled(poemPromises);
-    
-    // Separate successful and failed poems
+    // Transform and validate each poem
     const successfulPoems = [];
     const failedPoems = [];
     
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        const poem = result.value;
-        if (poem.error) {
-          failedPoems.push({ filename: indexData.poems[index], error: poem.message });
-        } else {
-          successfulPoems.push(poem);
-        }
-      } else {
-        failedPoems.push({ filename: indexData.poems[index], error: result.reason?.message || 'Unknown error' });
+    poemsData.poems.forEach((jsonPoem, index) => {
+      try {
+        const transformedPoem = transformPoemFromJson(jsonPoem);
+        validatePoem(transformedPoem, `poem ${index + 1}`);
+        successfulPoems.push(transformedPoem);
+      } catch (error) {
+        const poemTitle = jsonPoem?.title || `poem ${index + 1}`;
+        console.error(`Failed to process ${poemTitle}:`, error);
+        failedPoems.push({ title: poemTitle, error: error.message });
       }
     });
     
     // Log failed poems for debugging
     if (failedPoems.length > 0) {
-      console.warn(`${failedPoems.length} poem(s) failed to load:`, failedPoems);
+      console.warn(`${failedPoems.length} poem(s) failed to process:`, failedPoems);
     }
     
     if (successfulPoems.length === 0) {
-      throw new Error('No poems loaded successfully. Please check the console for details.');
+      throw new Error('No poems processed successfully. Please check the console for details.');
     }
     
     poems = successfulPoems;
