@@ -663,12 +663,13 @@ function setupAlternateVersionTooltips() {
   
   // Function to hide tooltip and clean up marker highlighting
   function hideTooltipAndCleanup() {
-    if (activeMarkerElement && activePage) {
-      const markerId = activeMarkerElement.getAttribute('data-marker-id');
-      toggleMarkerHover(markerId, activePage, false);
-      activeMarkerElement = null;
-      activePage = null;
-    }
+    // Remove highlighting from all markers (more reliable than tracking activeMarkerElement)
+    const allHighlightedMarkers = document.querySelectorAll('.marker-hovered');
+    allHighlightedMarkers.forEach(span => {
+      span.classList.remove('marker-hovered');
+    });
+    activeMarkerElement = null;
+    activePage = null;
     hideTooltip(tooltip);
   }
   
