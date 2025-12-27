@@ -1,7 +1,8 @@
 // Constants
 const SCROLL_THRESHOLD = 10;
-const SWIPE_THRESHOLD = 45;
+const SWIPE_THRESHOLD = 80;
 const SWIPE_MAX_DURATION = 600;
+const SWIPE_HORIZONTAL_RATIO = 1.5;
 const LABEL_HIDE_DELAY = 300;
 const INTERSECTION_THRESHOLD = 0.7;
 const SCROLL_TRIGGER_RATIO = 0.5;
@@ -1263,8 +1264,8 @@ function init() {
         touchStartTime = 0;
 
         const isHorizontalSwipe =
-          Math.abs(deltaX) > Math.abs(deltaY) &&
           Math.abs(deltaX) > SWIPE_THRESHOLD &&
+          Math.abs(deltaX) > Math.abs(deltaY) * SWIPE_HORIZONTAL_RATIO &&
           duration < SWIPE_MAX_DURATION;
 
         if (isHorizontalSwipe) {
