@@ -678,7 +678,7 @@ body.safari .page.active {
   
   /* Adjust underline position on mobile to prevent overlap with next line */
   .stanza-cell .has-alternate-version::after {
-    bottom: 0.1em;
+    bottom: 0.15em;
   }
 }
 
