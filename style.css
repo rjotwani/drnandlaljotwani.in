@@ -425,7 +425,7 @@ body.safari .page.active {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding-right: clamp(0.3rem, 1vw, 0.55rem);
+  padding-right: clamp(0.3rem, 1vw, 0.4rem);
   scrollbar-gutter: stable both-edges;
   position: relative;
 }
@@ -633,6 +633,7 @@ body.safari .page.active {
   color: var(--text-secondary);
   font-size: clamp(1rem, 2.2vw, 1.3rem);
   line-height: 1.2;
+  white-space: pre-wrap;
   text-align: left;
   display: flex;
   align-items: flex-end;
@@ -667,11 +668,13 @@ body.safari .page.active {
    Alternate Version Tooltips
    ============================================ */
 .has-alternate-version {
+  display: inline;
   position: relative;
   cursor: help;
   border-bottom: 1px dotted var(--accent);
   transition: background-color 150ms ease, border-bottom-color 150ms ease, color 150ms ease;
   color: var(--accent-dark);
+  vertical-align: baseline;
 }
 
 .has-alternate-version:hover,
