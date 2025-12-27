@@ -651,6 +651,10 @@ function setupAlternateVersionTooltips() {
     document.body.appendChild(tooltip);
   }
   
+  // Track active marker for cleanup when hiding tooltip
+  let activeMarkerElement = null;
+  let activePage = null;
+  
   // Helper function to toggle hover class on related spans
   function toggleMarkerHover(markerId, page, add) {
     if (!markerId || !page) return;
@@ -659,6 +663,34 @@ function setupAlternateVersionTooltips() {
       span.classList[add ? 'add' : 'remove']('marker-hovered');
     });
   }
+  
+  // Function to hide tooltip and clean up marker highlighting
+  function hideTooltipAndCleanup() {
+    if (activeMarkerElement && activePage) {
+      const markerId = activeMarkerElement.getAttribute('data-marker-id');
+      toggleMarkerHover(markerId, activePage, false);
+      activeMarkerElement = null;
+      activePage = null;
+    }
+    hideTooltip(tooltip);
+  }
+  
+  // Document-level touch handler to close tooltip when tapping outside
+  function handleDocumentTouch(e) {
+    // Check if the touch target is a marker element or inside the tooltip
+    const target = e.target;
+    if (target.closest('.has-alternate-version') || target.closest('#alternate-version-tooltip')) {
+      return; // Don't hide if tapping on a marker or the tooltip itself
+    }
+    
+    // Hide tooltip if tapping elsewhere
+    if (tooltip.style.display === 'block') {
+      hideTooltipAndCleanup();
+    }
+  }
+  
+  // Add document-level touch handler (only on mobile)
+  document.addEventListener('touchstart', handleDocumentTouch, { passive: true });
   
   // Get all elements with alternate versions
   const elementsWithAlternates = document.querySelectorAll('.has-alternate-version');
@@ -685,13 +717,16 @@ function setupAlternateVersionTooltips() {
     
     // Touch handler
     element.addEventListener('touchstart', (e) => {
-      e.preventDefault();
+      e.stopPropagation(); // Prevent document-level handler from firing
       const markerId = e.target.getAttribute('data-marker-id');
       const isVisible = tooltip.style.display === 'block';
-      toggleMarkerHover(markerId, page, !isVisible);
+      
       if (isVisible) {
-        hideTooltip(tooltip);
+        hideTooltipAndCleanup();
       } else {
+        activeMarkerElement = e.target;
+        activePage = page;
+        toggleMarkerHover(markerId, page, true);
         showTooltip(e.target, note, tooltip);
       }
     });
