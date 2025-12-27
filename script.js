@@ -41,6 +41,7 @@ const eventHandlers = {
   coverClick: null,
   floatingButton: null,
   scrollHide: null,
+  documentTouch: null, // Document-level touch handler for tooltip cleanup
   desktopToggleButtons: new WeakMap() // Store handlers for desktop toggle buttons
 };
 
@@ -689,7 +690,13 @@ function setupAlternateVersionTooltips() {
     }
   }
   
+  // Remove existing document-level touch handler if present (prevent memory leak)
+  if (eventHandlers.documentTouch) {
+    document.removeEventListener('touchstart', eventHandlers.documentTouch, { passive: true });
+  }
+  
   // Add document-level touch handler (only on mobile)
+  eventHandlers.documentTouch = handleDocumentTouch;
   document.addEventListener('touchstart', handleDocumentTouch, { passive: true });
   
   // Get all elements with alternate versions
@@ -733,7 +740,13 @@ function setupAlternateVersionTooltips() {
   });
 }
 
-// Show tooltip at the position of the element
+/**
+ * Shows a tooltip at the position of the specified element
+ * Automatically positions above or below based on available space
+ * @param {HTMLElement} element - The element to show tooltip for
+ * @param {string} note - The tooltip text content
+ * @param {HTMLElement} tooltip - The tooltip DOM element
+ */
 function showTooltip(element, note, tooltip) {
   tooltip.textContent = note;
   tooltip.setAttribute('aria-hidden', 'false');
@@ -808,12 +821,19 @@ function showTooltip(element, note, tooltip) {
   });
 }
 
-// Hide tooltip
+/**
+ * Hides the tooltip element
+ * @param {HTMLElement} tooltip - The tooltip DOM element to hide
+ */
 function hideTooltip(tooltip) {
   tooltip.style.display = 'none';
   tooltip.setAttribute('aria-hidden', 'true');
 }
 
+/**
+ * Updates the text of the floating translation button based on current state
+ * Only updates if on mobile device and button exists
+ */
 function updateFloatingButton() {
   if (floatingTranslationButton && isMobileDevice()) {
     const activePage = pages[currentPage];
@@ -825,6 +845,12 @@ function updateFloatingButton() {
 }
 
 
+/**
+ * Sets up translation toggle buttons based on device type
+ * Mobile: Creates a single floating button
+ * Desktop: Uses individual buttons in each page footer
+ * Automatically switches between modes on resize
+ */
 function setupTranslationToggles() {
   // Invalidate cache since device type might have changed
   invalidateMobileCache();
@@ -1168,7 +1194,10 @@ function setupNotebookReveal() {
   }
 }
 
-// Detect Safari and add class to body for CSS workarounds
+/**
+ * Detects Safari browser and adds 'safari' class to body for CSS workarounds
+ * Safari has known issues with 3D transforms that require special handling
+ */
 function detectSafari() {
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   if (isSafari) {
