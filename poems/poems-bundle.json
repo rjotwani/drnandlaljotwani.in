@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-02-20T07:50:34.032105+00:00",
+  "generatedAt": "2026-02-20T07:53:50.149400+00:00",
   "files": [
     "01-dapu-athamu.yaml",
     "02-vande-maataram.yaml",
@@ -11,7 +11,8 @@
     "07-desh-premu.yaml",
     "08-amar-shaheed-hemu-kalani-vande-maataram-vande-maataram.yaml",
     "09-tuun-nashiilii-nigaahun-saan-nihaariin-chho-thii.yaml",
-    "10-kithe-ta-kaa-baahi-lagii-huundii.yaml"
+    "10-kithe-ta-kaa-baahi-lagii-huundii.yaml",
+    "11-likhaan-ta-maan-chhaa-likhaan.yaml"
   ],
   "poems": [
     {
@@ -104,6 +105,14 @@
       "original": "धूओं ईएं त न उभिरंदो आ\nकिथे त का बाहि लॻी हूंदी\n\nअख्युनि में अश्क़ु ईएं त न ईंदो आ\nकिथे त का चोट, हाए लॻी हूंदी\n\nगुलाबु ईएं त न उपजंदो आ\nकिथे त कन्दन जी काह थी हूंदी\n\nत्सुनामी ज़लज़लो ईएं त न थींदो आ\nकिथे त कहिंजी आह लॻी हूंदी\n\nचेहरे ते रौनक़ ईएं त न ईंदी आ\nकिथे त सन्दुस चाहा लॻी हूंदी\n\nगगन में थालीरो ईएं त न वजंदो आ\nका त न्याणी किथे अघाणी हूंदी\n\nमां त लाहे आयुस सितारा, अर्श खां\nमुंहिंजे महबूब तसव्वुर में तलब कई हूंदी\n\nतूं त चवीं थो दोस्त आहीं मुंहिंजो, मगर\nकैंहिं भला पुठि में, तलवार हएं हूंदी\n\nतूं थियें जरदु हसद में, चउ छा जे करे\nकैंहिं शायद मुंहिंजी साराहा कई हूंदी\n\nमाण्हूं त मूं ॾिठा घणा आहिनि, मगर\nइंसान जी महक विरले ही किथां मिली हूंदी\n\nमां आयुम् त देर सां, हिन महिफिल में, मगर\nआयुम् त तूफ़ान जियां, इहा ॻाल्ह त नुमायां हूंदी\n\nग़ज़ल जो ॾाॾु ईएं त न मिलंदो आ\nज़रूर का ॻाल्ह दिल सां लॻी हूंदी\n",
       "translation": "The smoke does not rise for no reason \nsomething must be aflame somewhere \n\nThe tear doesn't roll in eye for no reason  \nsome injury alas is inflicted somewhere \n\nThe rose does not emerge from nowhere\nthe thorns may have pushed it to surface\n\nThe calamity doesn't descend for no reason \nhapless may have cursed in despair somewhere \n\nThe face doesn't brighten up for no reason \nsomeone has found some love somewhere\n\nThe sky doesn't blow trumpet for no reason \na poor man's daughter is wedded somewhere \n\nI plucked the flowers from the sky\nmy beloved may have asked for it in imagination\n\nYou claim to be my friend, but \nsomeone has struck sword in my back\n\nYou became pale in envy, tell me why\nsomeone may have admired me somewhere\n\nI have seen lots of people, but\nscarcely find the fragrance of the human\n\nI arrived rather late on the scene, but\nI came like a storm was felt by all\n\nIt's not easy to get quick applause on ghazal \nsomething in it has touched heart somewhere \n",
       "phonetic": "D'uunhon iien t'a na ubhirando aa \nkithe t'a kaa baahi lag'ii huundii  \n\nAkhyuni mein ashqu iien t'a na iind'o aa \nkithe t'a kaa chota, haai lag'ii huundii \n\nGulaabu iien t'a na upjando aa\nkithe ta kandan jii kaah thi huundii\n\nTsunaamii zalzalo iien t'a na th'iind'o aa \nkithe t'a kahinjii aaha lag'ii huundii\n\nChehre t'e raunaq iien t'a na iind'ii aa \nkithe t'a sand'us chaaha lag'ii huund'ii\n\nGagan mein th'aaliro iien t'a na vaj'and'o aa \nkaa t'a niyaan'ii kithe aghaan'ii huundii\n\nMaan ta laahe aayus sitaaraa, arsh khaan\nmuinhinje mahboob tasavuur mein talab keii hundii\n\nTuun ta chaviin tho dost aanhiin muinhinjo, magar\nkainhin bhalla  puthi mein,  talwaar haeen huundii\n\nTuun thiien zardu hasad mein, chau chha je kare\nkainhin shaayad muinhinjii saaraaha keii huundii\n\nMaanhuun ta muun d'ithaa ghan'aa aahin, magar\ninsaan jii mahak virle hi kithaan milii huundii\n\nMaan  aayum ta der saan, hina mehfil mein, magar\naayum ta toofaan jiyaan, ihaa g'aalh ta numaayaan huundii\n\nGhazal jo d'aad'u iien t'a na miland'o aa \nzaroor kaa g'aalh dil saan lag'ii huund'ii \n"
+    },
+    {
+      "title": "लिख़ां त मां छा लिख़ां ..",
+      "titleTranslation": "What Should I Write...",
+      "titlePhonetic": "Likhaan Ta Maan Chhaa Likhaan ..",
+      "original": "लिख़ां त मां छा लिख़ां -\nॾिसां त मां छा ॾिसां,\nचवां त मां छा चवां\nकींअ चवां, जेको ॾिसां.\n\nॾिसां थो त अदब जो अदबु -\nन थो थिए हिन शहर में,\nइनामु वठण वारो, माहिरु आ\nन नज़म में, न नसुर में !\n\nलिख़ां त मां छा लिख़ां -\nॾिसां त मां छा ॾिसां,\nचवां त मां छा चवां\nकींअ चवां, जेको ॾिसां.\n\nॾिसां थो त ख़ुदगर्ज़ु आ जो\nथो समुझे ख़ुद खे ख़ुदा !\nॾिसां थो त सचु जो चवे -\nथो थिए जॻ खां जुदा !\n\nलिख़ां त मां छा लिख़ां -\nॾिसां त मां छा ॾिसां,\nचवां त मां छा चवां\nकींअ चवां, जेको ॾिसां.\n",
+      "translation": "What should I write—\nwhat should I even look at?\nWhat should I say—\nhow can I say what I see?\n\nI see that respect for literature is gone—\nit doesn't exist in this city anymore.\nThe prize-taker may be “an expert,”\nyet neither in poetry—nor in prose!\n\nWhat should I write—\nwhat should I even look at?\nWhat should I say—\nhow can I say what I see?\n\nI see the selfish one\nwho thinks himself a god!\nI see that whoever speaks the truth\nis cast out from the world—set apart!\n\nWhat should I write—\nwhat should I even look at?\nWhat should I say—\nhow can I say what I see?\n",
+      "phonetic": "Likhaan ta maan chhaa likhaan -\nd'isaaan ta maan chhaa d'isaaan,\nchavaan ta maan chhaa chavaan\nkiien chavaan, jeko d'isaaan.\n\nD'isaaan tho t'a adaba jo adabu -\nna tho thiye hina shahar mein,\ninaamu vathan vaaro, maahiru aa\nna nazma mein, na nasur mein !\n\nLikhaan ta maan chhaa likhaan -\nd'isaaan ta maan chhaa d'isaaan,\nchavaan ta maan chhaa chavaan\nkiien chavaan, jeko d'isaaan.\n\nD'isaaan tho t'a khudgarzu aa jo\ntho samjhe khud khe khudaa !\nd'isaaan tho t'a sachu jo chave -\ntho thiye jag'a khaan judaa !\n\nLikhaan ta maan chhaa likhaan -\nd'isaaan ta maan chhaa d'isaaan,\nchavaan ta maan chhaa chavaan\nkiien chavaan, jeko d'isaaan.\n"
     }
   ]
 }
