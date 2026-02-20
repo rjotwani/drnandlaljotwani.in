@@ -16,6 +16,7 @@ const MOBILE_SCROLL_OFFSET = 20;
 const SCROLL_INDICATOR_OFFSET = 60;
 const POEMS_INDEX_PATH = 'poems/index.json';
 const POEMS_BUNDLE_PATH = 'poems/poems-bundle.json';
+const LOCAL_DEV_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
 
 // DOM elements - validated at initialization
 let notebook;
@@ -1120,6 +1121,14 @@ async function loadPoemsFromYamlFiles() {
 }
 
 /**
+ * Determines whether local development should bypass the prebuilt bundle.
+ * @returns {boolean}
+ */
+function shouldUseYamlInLocalDev() {
+  return LOCAL_DEV_HOSTNAMES.has(window.location.hostname);
+}
+
+/**
  * Loads poems from prebuilt bundle (preferred), with YAML fallback.
  * Loads available poems even if some YAML files fail to load.
  */
@@ -1129,14 +1138,21 @@ async function loadPoems() {
     let successfulPoems = [];
     let failedPoems = [];
     
-    try {
-      successfulPoems = await loadPoemsFromBundle();
-      loadedFromBundle = true;
-    } catch (bundleError) {
-      console.warn('Poem bundle unavailable, falling back to YAML files:', bundleError);
+    if (shouldUseYamlInLocalDev()) {
+      console.info('Local dev host detected. Loading poems from YAML files.');
       const yamlResult = await loadPoemsFromYamlFiles();
       successfulPoems = yamlResult.successfulPoems;
       failedPoems = yamlResult.failedPoems;
+    } else {
+      try {
+        successfulPoems = await loadPoemsFromBundle();
+        loadedFromBundle = true;
+      } catch (bundleError) {
+        console.warn('Poem bundle unavailable, falling back to YAML files:', bundleError);
+        const yamlResult = await loadPoemsFromYamlFiles();
+        successfulPoems = yamlResult.successfulPoems;
+        failedPoems = yamlResult.failedPoems;
+      }
     }
     
     if (failedPoems.length > 0) {
