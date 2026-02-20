@@ -14,6 +14,7 @@ const MOBILE_LANDSCAPE_WIDTH_THRESHOLD = 1000;
 const MOBILE_LANDSCAPE_HEIGHT_THRESHOLD = 500;
 const MOBILE_SCROLL_OFFSET = 20;
 const SCROLL_INDICATOR_OFFSET = 60;
+const POEMS_INDEX_PATH = 'poems/index.json';
 
 // DOM elements - validated at initialization
 let notebook;
@@ -1000,84 +1001,92 @@ function validatePoem(poem, filename) {
 }
 
 /**
- * Transforms a poem from JSON format (with nested text arrays) to the format expected by the rendering code
- * @param {Object} jsonPoem - The poem object from JSON
- * @returns {Object} The transformed poem object
+ * Parses a poem YAML file using js-yaml loaded in index.html.
+ * @param {string} yamlText - Raw YAML content
+ * @param {string} filename - Source file name
+ * @returns {Object} Parsed poem object
  */
-function transformPoemFromJson(jsonPoem) {
-  if (!jsonPoem || typeof jsonPoem !== 'object') {
-    throw new Error('Invalid poem object');
+function parsePoemFromYaml(yamlText, filename) {
+  if (typeof jsyaml === 'undefined' || typeof jsyaml.load !== 'function') {
+    throw new Error('js-yaml parser is not available');
   }
   
-  const transformed = {
-    title: jsonPoem.title,
-    titleTranslation: jsonPoem.titleTranslation,
-    titlePhonetic: jsonPoem.titlePhonetic,
-    untitled: jsonPoem.untitled,
-    hoverText: jsonPoem.hoverText
-  };
-  
-  // Convert text arrays to strings (join with \n)
-  if (jsonPoem.text && typeof jsonPoem.text === 'object') {
-    if (Array.isArray(jsonPoem.text.original)) {
-      transformed.original = jsonPoem.text.original.join('\n');
-    } else {
-      throw new Error('Missing or invalid original text array');
-    }
-    
-    if (Array.isArray(jsonPoem.text.translation)) {
-      transformed.translation = jsonPoem.text.translation.join('\n');
-    } else {
-      throw new Error('Missing or invalid translation text array');
-    }
-    
-    if (Array.isArray(jsonPoem.text.phonetic)) {
-      transformed.phonetic = jsonPoem.text.phonetic.join('\n');
-    }
-    // phonetic is optional, so we don't throw if it's missing
-  } else {
-    throw new Error('Missing text object in poem');
+  let parsed;
+  try {
+    parsed = jsyaml.load(yamlText);
+  } catch (error) {
+    throw new Error(`Invalid YAML in ${filename}: ${error.message}`);
   }
   
-  return transformed;
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(`Invalid YAML structure in ${filename}: expected an object`);
+  }
+  
+  return parsed;
 }
 
 /**
- * Loads poems from poems.json with graceful error handling
+ * Loads the poem YAML manifest from poems/index.json.
+ * @returns {Promise<string[]>} Ordered list of poem YAML filenames
+ */
+async function loadPoemManifest() {
+  const response = await fetch(POEMS_INDEX_PATH);
+  if (!response.ok) {
+    throw new Error(`Failed to load poem index: ${response.status} ${response.statusText}`);
+  }
+  
+  const manifest = await response.json();
+  if (!manifest || typeof manifest !== 'object' || !Array.isArray(manifest.files)) {
+    throw new Error('Invalid poem index format: missing files array');
+  }
+  
+  const files = manifest.files;
+  if (files.length === 0) {
+    throw new Error('Poem index is empty');
+  }
+  
+  const isValidFile = (file) =>
+    typeof file === 'string' &&
+    file.trim() !== '' &&
+    file.endsWith('.yaml') &&
+    !file.includes('..') &&
+    !file.startsWith('/');
+  
+  if (!files.every(isValidFile)) {
+    throw new Error('Invalid poem index format: files must be relative .yaml filenames');
+  }
+  
+  return files;
+}
+
+/**
+ * Loads poems from YAML files with graceful error handling
  * Loads available poems even if some fail to load
  */
 async function loadPoems() {
   try {
-    // Load the poems.json file
-    const poemsResponse = await fetch('poems.json');
-    if (!poemsResponse.ok) {
-      throw new Error(`Failed to load poems.json: ${poemsResponse.status} ${poemsResponse.statusText}`);
-    }
-    const poemsData = await poemsResponse.json();
+    const poemYamlFiles = await loadPoemManifest();
     
-    if (!poemsData.poems || !Array.isArray(poemsData.poems)) {
-      throw new Error('Invalid poems.json format: missing or invalid poems array');
-    }
-    
-    if (poemsData.poems.length === 0) {
-      throw new Error('No poems found in poems.json');
-    }
-    
-    // Transform and validate each poem
+    // Parse and validate each poem YAML
     const successfulPoems = [];
     const failedPoems = [];
     
-    poemsData.poems.forEach((jsonPoem, index) => {
+    for (const filename of poemYamlFiles) {
       try {
-        const transformedPoem = transformPoemFromJson(jsonPoem);
-        validatePoem(transformedPoem, `poem ${index + 1}`);
-        successfulPoems.push(transformedPoem);
+        const response = await fetch(`poems/${filename}`);
+        if (!response.ok) {
+          throw new Error(`Failed to load ${filename}: ${response.status} ${response.statusText}`);
+        }
+        
+        const yamlText = await response.text();
+        const parsedPoem = parsePoemFromYaml(yamlText, filename);
+        validatePoem(parsedPoem, filename);
+        successfulPoems.push(parsedPoem);
       } catch (error) {
-        const poemTitle = jsonPoem?.title || `poem ${index + 1}`;
-        console.error(`Failed to process ${poemTitle}:`, error);
-        failedPoems.push({ title: poemTitle, error: error.message });
+        console.error(`Failed to process ${filename}:`, error);
+        failedPoems.push({ file: filename, error: error.message });
       }
-    });
+    }
     
     // Log failed poems for debugging
     if (failedPoems.length > 0) {
