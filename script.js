@@ -17,6 +17,7 @@ const SCROLL_INDICATOR_OFFSET = 60;
 const POEMS_INDEX_PATH = 'poems/index.json';
 const POEMS_BUNDLE_PATH = 'poems/poems-bundle.json';
 const LOCAL_DEV_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
+const TRANSLATION_PREFERENCE_KEY = 'globalTranslationVisible';
 
 // DOM elements - validated at initialization
 let notebook;
@@ -30,6 +31,7 @@ let currentPage = 0;
 let poems = [];
 let poemSlugs = [];
 let floatingTranslationButton = null;
+let isTranslationVisibleGlobal = false;
 let scrollIndicatorHidden = false;
 let resizeTimeout = null;
 let isMobileDeviceCache = null;
@@ -245,6 +247,7 @@ function renderPoems() {
     const page = document.createElement('article');
     page.className = 'page';
     if (index === 0) page.classList.add('active');
+    if (isTranslationVisibleGlobal) page.classList.add('translation-visible');
     page.setAttribute('data-page', index + 1);
     page.setAttribute('aria-label', `Poem ${index + 1}: ${poem.title}`);
 
@@ -528,7 +531,7 @@ function renderPoems() {
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'toggle-translation';
     toggleBtn.type = 'button';
-    toggleBtn.textContent = 'Show translation';
+    toggleBtn.textContent = isTranslationVisibleGlobal ? 'Hide translation' : 'Show translation';
     toggleBtn.setAttribute('aria-label', 'Toggle translation visibility');
     topRow.appendChild(toggleBtn);
 
@@ -875,12 +878,53 @@ function hideTooltip(tooltip) {
  */
 function updateFloatingButton() {
   if (floatingTranslationButton && isMobileDevice()) {
-    const activePage = pages[currentPage];
-    if (activePage) {
-      const isVisible = activePage.classList.contains('translation-visible');
-      floatingTranslationButton.textContent = isVisible ? 'Hide translation' : 'Show translation';
-    }
+    floatingTranslationButton.textContent = isTranslationVisibleGlobal ? 'Hide translation' : 'Show translation';
   }
+}
+
+/**
+ * Loads global translation visibility preference from local storage.
+ */
+function loadTranslationPreference() {
+  try {
+    isTranslationVisibleGlobal = localStorage.getItem(TRANSLATION_PREFERENCE_KEY) === 'true';
+  } catch (error) {
+    isTranslationVisibleGlobal = false;
+  }
+}
+
+/**
+ * Applies the current global translation state to all poem pages and controls.
+ */
+function applyGlobalTranslationState() {
+  pages.forEach((page) => {
+    page.classList.toggle('translation-visible', isTranslationVisibleGlobal);
+    const pageContent = page.querySelector('.page-content');
+    if (pageContent) {
+      updateScrollShadow(pageContent);
+    }
+  });
+  
+  document.querySelectorAll('.toggle-translation').forEach((button) => {
+    button.textContent = isTranslationVisibleGlobal ? 'Hide translation' : 'Show translation';
+  });
+  
+  updateFloatingButton();
+  setTimeout(() => setupAlternateVersionTooltips(), TRANSLATION_TOGGLE_UPDATE_DELAY);
+}
+
+/**
+ * Updates global translation state, persists preference, and applies UI changes.
+ * @param {boolean} visible - Whether translations should be visible
+ */
+function setGlobalTranslationVisibility(visible) {
+  isTranslationVisibleGlobal = Boolean(visible);
+  try {
+    localStorage.setItem(TRANSLATION_PREFERENCE_KEY, String(isTranslationVisibleGlobal));
+  } catch (error) {
+    // Ignore storage failures (private mode, blocked storage, etc.)
+  }
+  applyGlobalTranslationState();
 }
 
 
@@ -912,19 +956,13 @@ function setupTranslationToggles() {
     floatingTranslationButton = document.createElement('button');
     floatingTranslationButton.className = 'toggle-translation';
     floatingTranslationButton.type = 'button';
-    floatingTranslationButton.textContent = 'Show translation';
+    floatingTranslationButton.textContent = isTranslationVisibleGlobal ? 'Hide translation' : 'Show translation';
     floatingTranslationButton.setAttribute('aria-label', 'Toggle translation visibility');
     document.body.appendChild(floatingTranslationButton);
     
-    // Toggle translation for the active page
+    // Toggle translation globally for all pages
     const floatingButtonHandler = () => {
-      const activePage = pages[currentPage];
-      if (activePage) {
-        const isVisible = activePage.classList.toggle('translation-visible');
-        floatingTranslationButton.textContent = isVisible ? 'Hide translation' : 'Show translation';
-        // Re-setup tooltips after DOM changes
-        setTimeout(() => setupAlternateVersionTooltips(), TRANSLATION_TOGGLE_UPDATE_DELAY);
-      }
+      setGlobalTranslationVisibility(!isTranslationVisibleGlobal);
     };
     
     floatingTranslationButton.addEventListener('click', floatingButtonHandler);
@@ -951,19 +989,7 @@ function setupTranslationToggles() {
       
       // Create named handler function so we can remove it later
       const toggleHandler = () => {
-        const page = button.closest('.page');
-        if (!page) return;
-        
-        const isVisible = page.classList.toggle('translation-visible');
-        button.textContent = isVisible ? 'Hide translation' : 'Show translation';
-        // Update scroll shadow after translation toggle (content height may change)
-        const pageContent = page.querySelector('.page-content');
-        if (pageContent) {
-          setTimeout(() => {
-            updateScrollShadow(pageContent);
-            setupAlternateVersionTooltips(); // Re-setup tooltips after DOM changes
-          }, TRANSLATION_TOGGLE_UPDATE_DELAY);
-        }
+        setGlobalTranslationVisibility(!isTranslationVisibleGlobal);
       };
       
       // Store handler reference and add listener
@@ -1417,6 +1443,7 @@ function detectSafari() {
 // Initialize the application
 function init() {
   detectSafari();
+  loadTranslationPreference();
   
   // Validate DOM elements
   notebook = document.getElementById('notebook');
