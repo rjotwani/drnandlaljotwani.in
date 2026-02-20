@@ -28,6 +28,7 @@ let nextBtn;
 let pages = [];
 let currentPage = 0;
 let poems = [];
+let poemSlugs = [];
 let floatingTranslationButton = null;
 let scrollIndicatorHidden = false;
 let resizeTimeout = null;
@@ -45,6 +46,7 @@ const eventHandlers = {
   coverClick: null,
   floatingButton: null,
   scrollHide: null,
+  hashChange: null,
   documentTouch: null, // Document-level touch handler for tooltip cleanup
   desktopToggleButtons: new WeakMap() // Store handlers for desktop toggle buttons
 };
@@ -575,16 +577,35 @@ function updatePages() {
 }
 
 /**
- * Changes the current page by the specified delta
- * @param {number} delta - The number of pages to move (positive for next, negative for previous)
+ * Updates URL hash to match the current poem slug.
  */
-function changePage(delta) {
+function syncUrlToCurrentPoem() {
+  const slug = poemSlugs[currentPage];
+  if (!slug) return;
+  
+  const nextHash = `#${encodeURIComponent(slug)}`;
+  if (window.location.hash === nextHash) return;
+  
+  const nextUrl = `${window.location.pathname}${window.location.search}${nextHash}`;
+  history.replaceState(null, '', nextUrl);
+}
+
+/**
+ * Moves to a specific page index and updates UI state.
+ * @param {number} targetPage - The target page index
+ * @param {{ updateUrl?: boolean, smoothScrollOnMobile?: boolean }} [options]
+ */
+function goToPage(targetPage, options = {}) {
   if (pages.length === 0) return;
   
-  const nextPage = Math.min(pages.length - 1, Math.max(0, currentPage + delta));
+  const { updateUrl = true, smoothScrollOnMobile = true } = options;
+  const nextPage = Math.min(pages.length - 1, Math.max(0, targetPage));
   if (nextPage !== currentPage) {
     currentPage = nextPage;
     updatePages();
+    if (updateUrl) {
+      syncUrlToCurrentPoem();
+    }
     const activeContent = pages[currentPage]?.querySelector('.page-content');
     if (activeContent) {
       activeContent.scrollTop = 0;
@@ -593,7 +614,7 @@ function changePage(delta) {
     // Update floating button text on mobile
     updateFloatingButton();
     // On mobile, scroll to top of the new poem
-    if (isMobileDevice()) {
+    if (smoothScrollOnMobile && isMobileDevice()) {
       const activePage = pages[currentPage];
       if (activePage) {
         // Scroll to the new page
@@ -608,7 +629,17 @@ function changePage(delta) {
         });
       }
     }
+  } else if (updateUrl) {
+    syncUrlToCurrentPoem();
   }
+}
+
+/**
+ * Changes the current page by the specified delta
+ * @param {number} delta - The number of pages to move (positive for next, negative for previous)
+ */
+function changePage(delta) {
+  goToPage(currentPage + delta);
 }
 
 // Update scroll shadow visibility based on scroll position
@@ -1028,6 +1059,85 @@ function parsePoemFromYaml(yamlText, filename) {
 }
 
 /**
+ * Extracts poem number from filename prefix (e.g. "01-foo.yaml" -> "1").
+ * @param {string} filename - Poem filename (typically .yaml)
+ * @returns {string}
+ */
+function poemNumberFromFilename(filename) {
+  if (typeof filename !== 'string' || filename.trim() === '') return '';
+  const match = filename.trim().match(/^(\d+)/);
+  if (!match) return '';
+  const normalized = String(parseInt(match[1], 10));
+  return normalized === 'NaN' ? '' : normalized;
+}
+
+/**
+ * Builds unique numeric poem IDs in source order.
+ * @param {string[]} files
+ * @returns {string[]}
+ */
+function buildUniquePoemSlugs(files) {
+  const usedIds = new Set();
+  return files.map((filename, index) => {
+    const parsedNumber = poemNumberFromFilename(filename);
+    let poemId = parsedNumber || String(index + 1);
+    
+    if (!/^\d+$/.test(poemId)) {
+      poemId = String(index + 1);
+    }
+    
+    // Keep hash values numeric even if duplicate numbers are present.
+    while (usedIds.has(poemId)) {
+      poemId = String(Number(poemId) + 1);
+    }
+    
+    usedIds.add(poemId);
+    return poemId;
+  });
+}
+
+/**
+ * Resolves current URL hash to a poem index.
+ * @returns {number} Page index, or -1 if hash does not match a poem
+ */
+function getPageIndexFromHash() {
+  const rawHash = window.location.hash.replace(/^#/, '');
+  if (!rawHash) return -1;
+  
+  const decodedHash = decodeURIComponent(rawHash).trim().toLowerCase();
+  if (!decodedHash) return -1;
+  
+  const normalizedHash = decodedHash.startsWith('poem/') ? decodedHash.slice(5) : decodedHash;
+  if (!/^\d+$/.test(normalizedHash)) return -1;
+  return poemSlugs.findIndex((slug) => slug.toLowerCase() === normalizedHash);
+}
+
+/**
+ * Reveals the notebook and scrolls it into view for deep-linked poem URLs.
+ */
+function revealNotebookForDeepLink() {
+  if (!notebook) return;
+  const notebookStage = document.querySelector('.notebook-stage');
+  if (!notebookStage) return;
+  
+  notebook.classList.add('open');
+  hideScrollIndicator();
+  setTimeout(() => {
+    notebook.classList.add('label-hidden');
+  }, LABEL_HIDE_DELAY);
+  
+  requestAnimationFrame(() => {
+    const rect = notebookStage.getBoundingClientRect();
+    const scrollTop = getScrollTop();
+    const targetPosition = Math.max(0, rect.top + scrollTop - MOBILE_SCROLL_OFFSET);
+    window.scrollTo({
+      top: targetPosition,
+      behavior: 'auto'
+    });
+  });
+}
+
+/**
  * Loads the poem YAML manifest from poems/index.json.
  * @returns {Promise<string[]>} Ordered list of poem YAML filenames
  */
@@ -1063,7 +1173,7 @@ async function loadPoemManifest() {
 
 /**
  * Loads prebuilt poem bundle generated in CI.
- * @returns {Promise<Object[]>} Validated poems array from bundle
+ * @returns {Promise<{poems: Object[], slugs: string[]}>} Validated poems with slugs from bundle
  */
 async function loadPoemsFromBundle() {
   const response = await fetch(POEMS_BUNDLE_PATH, { cache: 'no-store' });
@@ -1081,26 +1191,33 @@ async function loadPoemsFromBundle() {
   }
   
   const validatedPoems = [];
+  const sourceFiles = Array.isArray(bundle.files) ? bundle.files : [];
+  const slugs = buildUniquePoemSlugs(sourceFiles);
   for (const [index, poem] of bundle.poems.entries()) {
-    const filename = Array.isArray(bundle.files) ? (bundle.files[index] || `bundle-entry-${index + 1}`) : `bundle-entry-${index + 1}`;
+    const filename = sourceFiles[index] || `bundle-entry-${index + 1}`;
     validatePoem(poem, filename);
     validatedPoems.push(poem);
   }
   
-  return validatedPoems;
+  return {
+    poems: validatedPoems,
+    slugs: validatedPoems.map((_, index) => slugs[index] || `poem-${index + 1}`)
+  };
 }
 
 /**
  * Legacy fallback path: load and parse individual YAML poem files.
- * @returns {Promise<{successfulPoems: Object[], failedPoems: Array<{file: string, error: string}>}>}
+ * @returns {Promise<{successfulPoems: Object[], successfulSlugs: string[], failedPoems: Array<{file: string, error: string}>}>}
  */
 async function loadPoemsFromYamlFiles() {
   const poemYamlFiles = await loadPoemManifest();
+  const poemYamlSlugs = buildUniquePoemSlugs(poemYamlFiles);
   
   const successfulPoems = [];
+  const successfulSlugs = [];
   const failedPoems = [];
   
-  for (const filename of poemYamlFiles) {
+  for (const [index, filename] of poemYamlFiles.entries()) {
     try {
       const response = await fetch(`poems/${filename}`);
       if (!response.ok) {
@@ -1111,13 +1228,14 @@ async function loadPoemsFromYamlFiles() {
       const parsedPoem = parsePoemFromYaml(yamlText, filename);
       validatePoem(parsedPoem, filename);
       successfulPoems.push(parsedPoem);
+      successfulSlugs.push(poemYamlSlugs[index] || `poem-${successfulPoems.length}`);
     } catch (error) {
       console.error(`Failed to process ${filename}:`, error);
       failedPoems.push({ file: filename, error: error.message });
     }
   }
   
-  return { successfulPoems, failedPoems };
+  return { successfulPoems, successfulSlugs, failedPoems };
 }
 
 /**
@@ -1136,21 +1254,26 @@ async function loadPoems() {
   try {
     let loadedFromBundle = false;
     let successfulPoems = [];
+    let successfulSlugs = [];
     let failedPoems = [];
     
     if (shouldUseYamlInLocalDev()) {
       console.info('Local dev host detected. Loading poems from YAML files.');
       const yamlResult = await loadPoemsFromYamlFiles();
       successfulPoems = yamlResult.successfulPoems;
+      successfulSlugs = yamlResult.successfulSlugs;
       failedPoems = yamlResult.failedPoems;
     } else {
       try {
-        successfulPoems = await loadPoemsFromBundle();
+        const bundleResult = await loadPoemsFromBundle();
+        successfulPoems = bundleResult.poems;
+        successfulSlugs = bundleResult.slugs;
         loadedFromBundle = true;
       } catch (bundleError) {
         console.warn('Poem bundle unavailable, falling back to YAML files:', bundleError);
         const yamlResult = await loadPoemsFromYamlFiles();
         successfulPoems = yamlResult.successfulPoems;
+        successfulSlugs = yamlResult.successfulSlugs;
         failedPoems = yamlResult.failedPoems;
       }
     }
@@ -1164,6 +1287,12 @@ async function loadPoems() {
     }
     
     poems = successfulPoems;
+    poemSlugs = successfulSlugs.length === successfulPoems.length
+      ? successfulSlugs
+      : successfulPoems.map((_, index) => `poem-${index + 1}`);
+    
+    const pageFromHash = getPageIndexFromHash();
+    currentPage = pageFromHash >= 0 ? pageFromHash : 0;
     
     if (loadedFromBundle) {
       console.info(`Loaded ${successfulPoems.length} poem(s) from prebuilt bundle`);
@@ -1174,6 +1303,10 @@ async function loadPoems() {
     setupTranslationToggles();
     updatePages();
     setupScrollShadows();
+    
+    if (pageFromHash >= 0) {
+      revealNotebookForDeepLink();
+    }
   } catch (error) {
     console.error('Error loading poems:', error);
     const userMessage = 'Unable to load poems. Please refresh the page or contact support if the problem persists.';
@@ -1309,6 +1442,18 @@ function init() {
   
   eventHandlers.keyboard = keyboardHandler;
   window.addEventListener('keydown', keyboardHandler);
+  
+  if (eventHandlers.hashChange) {
+    window.removeEventListener('hashchange', eventHandlers.hashChange);
+  }
+  const hashChangeHandler = () => {
+    const pageFromHash = getPageIndexFromHash();
+    if (pageFromHash >= 0) {
+      goToPage(pageFromHash, { updateUrl: false });
+    }
+  };
+  eventHandlers.hashChange = hashChangeHandler;
+  window.addEventListener('hashchange', hashChangeHandler);
 
   // Navigation buttons
   prevBtn.addEventListener('click', () => changePage(-1));
