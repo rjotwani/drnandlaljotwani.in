@@ -1,0 +1,39 @@
+name: Build poems bundle
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "poems/index.json"
+      - "poems/*.yaml"
+      - "scripts/build-poems-bundle.py"
+      - ".github/workflows/build-poems-bundle.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install build dependency
+        run: pip install pyyaml
+
+      - name: Build poems bundle
+        run: python scripts/build-poems-bundle.py
+
+      - name: Commit generated bundle if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update generated poems bundle"
+          file_pattern: poems/poems-bundle.json

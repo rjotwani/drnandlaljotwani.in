@@ -15,6 +15,7 @@ const MOBILE_LANDSCAPE_HEIGHT_THRESHOLD = 500;
 const MOBILE_SCROLL_OFFSET = 20;
 const SCROLL_INDICATOR_OFFSET = 60;
 const POEMS_INDEX_PATH = 'poems/index.json';
+const POEMS_BUNDLE_PATH = 'poems/poems-bundle.json';
 
 // DOM elements - validated at initialization
 let notebook;
@@ -1060,35 +1061,84 @@ async function loadPoemManifest() {
 }
 
 /**
- * Loads poems from YAML files with graceful error handling
- * Loads available poems even if some fail to load
+ * Loads prebuilt poem bundle generated in CI.
+ * @returns {Promise<Object[]>} Validated poems array from bundle
+ */
+async function loadPoemsFromBundle() {
+  const response = await fetch(POEMS_BUNDLE_PATH, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`Failed to load poem bundle: ${response.status} ${response.statusText}`);
+  }
+  
+  const bundle = await response.json();
+  if (!bundle || typeof bundle !== 'object' || !Array.isArray(bundle.poems)) {
+    throw new Error('Invalid poem bundle format: missing poems array');
+  }
+  
+  if (bundle.poems.length === 0) {
+    throw new Error('Poem bundle is empty');
+  }
+  
+  const validatedPoems = [];
+  for (const [index, poem] of bundle.poems.entries()) {
+    const filename = Array.isArray(bundle.files) ? (bundle.files[index] || `bundle-entry-${index + 1}`) : `bundle-entry-${index + 1}`;
+    validatePoem(poem, filename);
+    validatedPoems.push(poem);
+  }
+  
+  return validatedPoems;
+}
+
+/**
+ * Legacy fallback path: load and parse individual YAML poem files.
+ * @returns {Promise<{successfulPoems: Object[], failedPoems: Array<{file: string, error: string}>}>}
+ */
+async function loadPoemsFromYamlFiles() {
+  const poemYamlFiles = await loadPoemManifest();
+  
+  const successfulPoems = [];
+  const failedPoems = [];
+  
+  for (const filename of poemYamlFiles) {
+    try {
+      const response = await fetch(`poems/${filename}`);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${filename}: ${response.status} ${response.statusText}`);
+      }
+      
+      const yamlText = await response.text();
+      const parsedPoem = parsePoemFromYaml(yamlText, filename);
+      validatePoem(parsedPoem, filename);
+      successfulPoems.push(parsedPoem);
+    } catch (error) {
+      console.error(`Failed to process ${filename}:`, error);
+      failedPoems.push({ file: filename, error: error.message });
+    }
+  }
+  
+  return { successfulPoems, failedPoems };
+}
+
+/**
+ * Loads poems from prebuilt bundle (preferred), with YAML fallback.
+ * Loads available poems even if some YAML files fail to load.
  */
 async function loadPoems() {
   try {
-    const poemYamlFiles = await loadPoemManifest();
+    let loadedFromBundle = false;
+    let successfulPoems = [];
+    let failedPoems = [];
     
-    // Parse and validate each poem YAML
-    const successfulPoems = [];
-    const failedPoems = [];
-    
-    for (const filename of poemYamlFiles) {
-      try {
-        const response = await fetch(`poems/${filename}`);
-        if (!response.ok) {
-          throw new Error(`Failed to load ${filename}: ${response.status} ${response.statusText}`);
-        }
-        
-        const yamlText = await response.text();
-        const parsedPoem = parsePoemFromYaml(yamlText, filename);
-        validatePoem(parsedPoem, filename);
-        successfulPoems.push(parsedPoem);
-      } catch (error) {
-        console.error(`Failed to process ${filename}:`, error);
-        failedPoems.push({ file: filename, error: error.message });
-      }
+    try {
+      successfulPoems = await loadPoemsFromBundle();
+      loadedFromBundle = true;
+    } catch (bundleError) {
+      console.warn('Poem bundle unavailable, falling back to YAML files:', bundleError);
+      const yamlResult = await loadPoemsFromYamlFiles();
+      successfulPoems = yamlResult.successfulPoems;
+      failedPoems = yamlResult.failedPoems;
     }
     
-    // Log failed poems for debugging
     if (failedPoems.length > 0) {
       console.warn(`${failedPoems.length} poem(s) failed to process:`, failedPoems);
     }
@@ -1099,10 +1149,8 @@ async function loadPoems() {
     
     poems = successfulPoems;
     
-    // Show warning if some poems failed
-    if (failedPoems.length > 0 && pagesContainer) {
-      const warningMessage = `${successfulPoems.length} poem(s) loaded successfully. ${failedPoems.length} poem(s) failed to load.`;
-      console.warn(warningMessage);
+    if (loadedFromBundle) {
+      console.info(`Loaded ${successfulPoems.length} poem(s) from prebuilt bundle`);
     }
     
     // Initialize the notebook once all poems are loaded
