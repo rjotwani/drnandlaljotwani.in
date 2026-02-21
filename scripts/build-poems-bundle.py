@@ -39,7 +39,8 @@ def main() -> None:
             poem_data = yaml.safe_load(poem_file)
 
         if not isinstance(poem_data, dict):
-            raise ValueError(f"Invalid poem structure in {filename}: expected object")
+            raise ValueError(
+                f"Invalid poem structure in {filename}: expected object")
 
         bundled_poems.append(poem_data)
 
@@ -54,7 +55,8 @@ def main() -> None:
         json.dump(payload, output_file, ensure_ascii=False, indent=2)
         output_file.write("\n")
 
-    print(f"Wrote {BUNDLE_PATH.relative_to(REPO_ROOT)} with {len(bundled_poems)} poems.")
+    print(
+        f"Wrote {BUNDLE_PATH.relative_to(REPO_ROOT)} with {len(bundled_poems)} poems.")
 
 
 if __name__ == "__main__":

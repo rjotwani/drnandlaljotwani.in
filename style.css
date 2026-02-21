@@ -8,7 +8,7 @@
   --accent: #be8c63;
   --accent-dark: #835737;
   --paper: #fffdf8;
-  
+
   /* Additional color variables */
   --text-secondary: #5c473c;
   --text-tertiary: #7a6456;
@@ -19,23 +19,23 @@
   --bg-gradient-start: #fefbf7;
   --bg-gradient-mid: #ecdfcf;
   --bg-gradient-end: #ddc8af;
-  
+
   /* Spacing scale */
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-2xl: 3rem;
-  
+
   /* Layout */
   --border-radius-sm: 12px;
   --border-radius-md: 16px;
   --border-radius-lg: 24px;
   --border-radius-full: 999px;
-  
+
   /* Transitions */
   --transition-normal: 300ms ease;
-  
+
   /* Focus outline */
   --focus-outline: 2px solid var(--accent-dark);
   --focus-outline-offset: 2px;
@@ -70,7 +70,8 @@ html::before {
 body {
   margin: 0;
   min-height: 100dvh;
-  background-color: transparent; /* Let html background show through */
+  background-color: transparent;
+  /* Let html background show through */
   font-family: "Spectral", serif;
   color: var(--ink);
   display: flex;
@@ -224,10 +225,13 @@ header .credentials {
 }
 
 @keyframes float-arrow {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
     opacity: 0.8;
   }
+
   50% {
     transform: translateY(12px);
     opacity: 1;
@@ -375,13 +379,11 @@ body.safari .page.active {
   position: absolute;
   inset: 0;
   padding: clamp(1.5rem, 3.5vw, 2.5rem);
-  background: repeating-linear-gradient(
-      0deg,
+  background: repeating-linear-gradient(0deg,
       rgba(255, 255, 255, 0),
       rgba(255, 255, 255, 0) 28px,
       rgba(222, 212, 198, 0.45) 28px,
-      rgba(222, 212, 198, 0.45) 29px
-    ),
+      rgba(222, 212, 198, 0.45) 29px),
     var(--paper);
   border-radius: var(--border-radius-sm);
   box-shadow:
@@ -431,50 +433,38 @@ body.safari .page.active {
 }
 
 .page-content.has-more-content-bottom {
-  mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    black calc(100% - 50px),
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    black 0%,
-    black calc(100% - 50px),
-    transparent 100%
-  );
+  mask-image: linear-gradient(to bottom,
+      black 0%,
+      black calc(100% - 50px),
+      transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+      black 0%,
+      black calc(100% - 50px),
+      transparent 100%);
 }
 
 .page-content.has-more-content-top {
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 50px,
-    black 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 50px,
-    black 100%
-  );
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 50px,
+      black 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 50px,
+      black 100%);
 }
 
 .page-content.has-more-content-top.has-more-content-bottom {
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 50px,
-    black calc(100% - 50px),
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    black 50px,
-    black calc(100% - 50px),
-    transparent 100%
-  );
+  mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 50px,
+      black calc(100% - 50px),
+      transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%,
+      black 50px,
+      black calc(100% - 50px),
+      transparent 100%);
 }
 
 .page-content::-webkit-scrollbar {
@@ -567,7 +557,7 @@ body.safari .page.active {
   width: 100%;
 }
 
-.page.translation-visible .poem-body > .original {
+.page.translation-visible .poem-body>.original {
   display: none;
 }
 
@@ -655,13 +645,14 @@ body.safari .page.active {
 
 /* On mobile, ensure tooltip spans flow naturally and don't create visual column breaks */
 @media (max-width: 700px),
-       (max-width: 1000px) and (max-height: 500px) and (orientation: landscape) {
+(max-width: 1000px) and (max-height: 500px) and (orientation: landscape) {
+
   /* Ensure translation content wrapper maintains inline flow */
   .translation-line-content {
     display: inline-block;
     width: 100%;
   }
-  
+
   /* Ensure tooltip spans remain truly inline and don't break line flow */
   .stanza-cell .has-alternate-version {
     display: inline !important;
@@ -675,7 +666,7 @@ body.safari .page.active {
     /* Prevent the span from creating visual separation */
     box-sizing: border-box;
   }
-  
+
   /* Adjust underline position on mobile to prevent overlap with next line */
   .stanza-cell .has-alternate-version::after {
     bottom: 0.15em;
@@ -748,7 +739,7 @@ body.safari .page.active {
   color: var(--ink);
   padding: 0.75rem 1rem;
   border-radius: var(--border-radius-sm);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.15),
     0 0 0 1px rgba(0, 0, 0, 0.08);
   font-size: 0.85rem;
@@ -774,11 +765,9 @@ body.safari .page.active {
   color: var(--text-tertiary);
   flex-shrink: 0;
   padding-top: 0.2rem;
-  background: linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0.7),
-    rgba(255, 255, 255, 0)
-  );
+  background: linear-gradient(0deg,
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0));
 }
 
 .footer-top {
@@ -789,7 +778,8 @@ body.safari .page.active {
 
 .scroll-hint {
   font-size: 0.75rem;
-  color: rgba(90, 70, 60, 0.85); /* Keep specific opacity */
+  color: rgba(90, 70, 60, 0.85);
+  /* Keep specific opacity */
   text-align: center;
   opacity: 0.85;
 }
@@ -804,11 +794,12 @@ body.safari .page.active {
   cursor: pointer;
   font-family: inherit;
   transition: transform 150ms ease, box-shadow 150ms ease;
-  min-height: 44px; /* Better touch target */
+  min-height: 44px;
+  /* Better touch target */
 }
 
 /* Hide floating button on desktop */
-body > .toggle-translation {
+body>.toggle-translation {
   display: none;
 }
 
@@ -893,7 +884,7 @@ body > .toggle-translation {
    Responsive Design
    ============================================ */
 @media (max-width: 700px),
-       (max-width: 1000px) and (max-height: 500px) and (orientation: landscape) {
+(max-width: 1000px) and (max-height: 500px) and (orientation: landscape) {
   body {
     padding: var(--space-sm) var(--space-md);
     gap: var(--space-sm);
@@ -1067,7 +1058,7 @@ body > .toggle-translation {
   }
 
   /* Floating translation button on mobile */
-  body > .toggle-translation {
+  body>.toggle-translation {
     display: block !important;
     position: fixed;
     bottom: 1.5rem;
@@ -1105,7 +1096,7 @@ body > .toggle-translation {
    Landscape Orientation
    ============================================ */
 @media (orientation: landscape) and (max-height: 600px),
-       (max-height: 500px) {
+(max-height: 500px) {
   body {
     padding: var(--space-sm) var(--space-md);
     gap: var(--space-sm);
@@ -1319,7 +1310,7 @@ body > .toggle-translation {
   }
 
   /* Floating translation button on mobile landscape */
-  body > .toggle-translation {
+  body>.toggle-translation {
     display: block !important;
     position: fixed;
     bottom: 1rem;
@@ -1346,7 +1337,8 @@ body > .toggle-translation {
 
   .scroll-hint {
     font-size: 0.65rem;
-    color: rgba(90, 70, 60, 0.95); /* Keep specific opacity */
+    color: rgba(90, 70, 60, 0.95);
+    /* Keep specific opacity */
     text-align: center;
   }
 
