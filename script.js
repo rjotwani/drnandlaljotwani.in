@@ -14,6 +14,7 @@ const MOBILE_LANDSCAPE_WIDTH_THRESHOLD = 1000;
 const MOBILE_LANDSCAPE_HEIGHT_THRESHOLD = 500;
 const MOBILE_SCROLL_OFFSET = 20;
 const SCROLL_INDICATOR_OFFSET = 60;
+const SHARE_COPY_FEEDBACK_DELAY = 1800;
 const POEMS_INDEX_PATH = 'poems/index.json';
 const POEMS_BUNDLE_PATH = 'poems/poems-bundle.json';
 const LOCAL_DEV_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
@@ -38,6 +39,9 @@ let isMobileDeviceCache = null;
 let cachedWindowWidth = null;
 let cachedWindowHeight = null;
 let cachedTouchSupport = null;
+let shareDialog = null;
+let shareDialogLastFocusedElement = null;
+let shareStatusTimeout = null;
 
 // Event handlers for cleanup
 const eventHandlers = {
@@ -50,6 +54,7 @@ const eventHandlers = {
   scrollHide: null,
   hashChange: null,
   documentTouch: null, // Document-level touch handler for tooltip cleanup
+  shareTrigger: null,
   desktopToggleButtons: new WeakMap() // Store handlers for desktop toggle buttons
 };
 
@@ -528,12 +533,25 @@ function renderPoems() {
     const topRow = document.createElement('div');
     topRow.className = 'footer-top';
 
+    const footerActions = document.createElement('div');
+    footerActions.className = 'footer-actions';
+
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'toggle-translation';
     toggleBtn.type = 'button';
     toggleBtn.textContent = isTranslationVisibleGlobal ? 'Hide translation' : 'Show translation';
     toggleBtn.setAttribute('aria-label', 'Toggle translation visibility');
-    topRow.appendChild(toggleBtn);
+    footerActions.appendChild(toggleBtn);
+
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'share-poem';
+    shareBtn.type = 'button';
+    shareBtn.textContent = 'Share';
+    shareBtn.setAttribute('aria-label', `Share poem ${index + 1}`);
+    shareBtn.setAttribute('data-page-index', String(index));
+    footerActions.appendChild(shareBtn);
+
+    topRow.appendChild(footerActions);
 
     const pageCount = document.createElement('span');
     pageCount.className = 'page-count';
@@ -591,6 +609,286 @@ function syncUrlToCurrentPoem() {
 
   const nextUrl = `${window.location.pathname}${window.location.search}${nextHash}`;
   history.replaceState(null, '', nextUrl);
+}
+
+/**
+ * Returns an absolute URL for a poem page using its slug/hash.
+ * @param {number} [pageIndex]
+ * @returns {string}
+ */
+function getPoemShareUrl(pageIndex = currentPage) {
+  const slug = poemSlugs[pageIndex];
+  const hash = slug ? `#${encodeURIComponent(slug)}` : '';
+  return `${window.location.origin}${window.location.pathname}${window.location.search}${hash}`;
+}
+
+/**
+ * Gets a copyable poem text for the requested language variant.
+ * @param {Object} poem
+ * @param {'original'|'phonetic'|'translation'} type
+ * @returns {string}
+ */
+function getShareTextByType(poem, type) {
+  if (!poem || typeof poem !== 'object') return '';
+  if (type === 'original') return poem.original || '';
+  if (type === 'phonetic') return poem.phonetic || '';
+  return poem.translation || '';
+}
+
+/**
+ * Copies text using modern clipboard API with a legacy fallback.
+ * @param {string} text
+ * @returns {Promise<boolean>}
+ */
+async function copyTextToClipboard(text) {
+  if (typeof text !== 'string' || text.trim() === '') return false;
+
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (error) {
+    // Fall through to legacy fallback
+  }
+
+  try {
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.value = text;
+    tempTextArea.setAttribute('readonly', 'true');
+    tempTextArea.style.position = 'fixed';
+    tempTextArea.style.left = '-9999px';
+    document.body.appendChild(tempTextArea);
+    tempTextArea.select();
+    tempTextArea.setSelectionRange(0, tempTextArea.value.length);
+    const copied = document.execCommand('copy');
+    document.body.removeChild(tempTextArea);
+    return copied;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Updates the share modal status message and optional error styling.
+ * @param {string} message
+ * @param {boolean} [isError]
+ */
+function setShareStatus(message, isError = false) {
+  if (!shareDialog) return;
+  const status = shareDialog.querySelector('[data-share-status]');
+  if (!status) return;
+
+  status.textContent = message || '';
+  status.classList.toggle('error', Boolean(isError));
+}
+
+/**
+ * Clears the share status after a brief delay.
+ */
+function clearShareStatusSoon() {
+  if (shareStatusTimeout) {
+    clearTimeout(shareStatusTimeout);
+  }
+  shareStatusTimeout = setTimeout(() => {
+    setShareStatus('');
+  }, SHARE_COPY_FEEDBACK_DELAY);
+}
+
+/**
+ * Closes the share dialog and restores focus to the opener button.
+ */
+function closeShareDialog() {
+  if (!shareDialog || shareDialog.hasAttribute('hidden')) return;
+
+  shareDialog.setAttribute('hidden', '');
+  document.body.classList.remove('share-dialog-open');
+  setShareStatus('');
+
+  if (shareStatusTimeout) {
+    clearTimeout(shareStatusTimeout);
+    shareStatusTimeout = null;
+  }
+
+  if (shareDialogLastFocusedElement instanceof HTMLElement) {
+    shareDialogLastFocusedElement.focus();
+  }
+}
+
+/**
+ * Handles keyboard controls while share dialog is open.
+ * @param {KeyboardEvent} event
+ */
+function handleShareDialogKeydown(event) {
+  if (!shareDialog || shareDialog.hasAttribute('hidden')) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeShareDialog();
+    return;
+  }
+
+  if (event.key !== 'Tab') return;
+
+  const panel = shareDialog.querySelector('.share-dialog-panel');
+  if (!panel) return;
+  const focusable = Array.from(
+    panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+  ).filter((el) => !el.hasAttribute('disabled'));
+
+  if (focusable.length === 0) return;
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const active = document.activeElement;
+
+  if (event.shiftKey && active === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && active === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+/**
+ * Opens the share dialog for the specified poem index.
+ * @param {number} pageIndex
+ * @param {HTMLElement|null} triggerElement
+ */
+function openShareDialog(pageIndex = currentPage, triggerElement = null) {
+  if (!shareDialog) return;
+
+  const poem = poems[pageIndex];
+  if (!poem) return;
+
+  const title = shareDialog.querySelector('[data-share-title]');
+  const urlInput = shareDialog.querySelector('[data-share-url]');
+  const phoneticCopyBtn = shareDialog.querySelector('[data-copy-type="phonetic"]');
+  const nativeShareBtn = shareDialog.querySelector('[data-native-share]');
+  const firstActionButton = shareDialog.querySelector('[data-copy-type="original"]');
+
+  if (!title || !urlInput || !phoneticCopyBtn || !nativeShareBtn || !firstActionButton) return;
+
+  shareDialogLastFocusedElement = triggerElement || document.activeElement;
+  shareDialog.setAttribute('data-page-index', String(pageIndex));
+
+  title.textContent = `Share "${poem.title}"`;
+  urlInput.value = getPoemShareUrl(pageIndex);
+
+  const hasPhonetic = typeof poem.phonetic === 'string' && poem.phonetic.trim() !== '';
+  phoneticCopyBtn.disabled = !hasPhonetic;
+
+  const supportsNativeShare = typeof navigator.share === 'function';
+  nativeShareBtn.hidden = !supportsNativeShare;
+
+  setShareStatus('Choose what to copy or share.');
+
+  shareDialog.removeAttribute('hidden');
+  document.body.classList.add('share-dialog-open');
+  firstActionButton.focus();
+}
+
+/**
+ * Creates and wires the share dialog UI once.
+ */
+function setupShareDialog() {
+  if (shareDialog) return;
+
+  shareDialog = document.createElement('div');
+  shareDialog.className = 'share-dialog-backdrop';
+  shareDialog.setAttribute('hidden', '');
+  shareDialog.innerHTML = `
+    <div class="share-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="shareDialogTitle">
+      <div class="share-dialog-header">
+        <h3 id="shareDialogTitle" data-share-title>Share poem</h3>
+        <button class="share-dialog-close" type="button" aria-label="Close share dialog">&times;</button>
+      </div>
+      <div class="share-dialog-actions">
+        <button type="button" data-copy-type="original">Copy Sindhi</button>
+        <button type="button" data-copy-type="phonetic">Copy phonetic</button>
+        <button type="button" data-copy-type="translation">Copy English</button>
+      </div>
+      <label class="share-url-label" for="shareUrlInput">Share URL</label>
+      <div class="share-url-row">
+        <input id="shareUrlInput" data-share-url type="text" readonly />
+        <button type="button" data-copy-url>Copy URL</button>
+      </div>
+      <button class="native-share-btn" type="button" data-native-share>Open share sheet</button>
+      <p class="share-status" data-share-status aria-live="polite"></p>
+    </div>
+  `;
+  document.body.appendChild(shareDialog);
+
+  shareDialog.addEventListener('click', (event) => {
+    if (event.target === shareDialog) {
+      closeShareDialog();
+      return;
+    }
+
+    const closeBtn = event.target.closest('.share-dialog-close');
+    if (closeBtn) {
+      closeShareDialog();
+      return;
+    }
+
+    const copyBtn = event.target.closest('[data-copy-type]');
+    if (copyBtn) {
+      const type = copyBtn.getAttribute('data-copy-type');
+      const pageIndex = Number(shareDialog.getAttribute('data-page-index'));
+      const poem = poems[pageIndex];
+      const copyValue = getShareTextByType(poem, type);
+      if (!copyValue.trim()) {
+        setShareStatus(`No ${type} text is available for this poem.`, true);
+        clearShareStatusSoon();
+        return;
+      }
+
+      const payload = `${poem.title}\n\n${copyValue.trim()}`;
+      copyTextToClipboard(payload).then((copied) => {
+        setShareStatus(copied ? `Copied ${type} text.` : `Could not copy ${type} text.`, !copied);
+        clearShareStatusSoon();
+      });
+      return;
+    }
+
+    const copyUrlBtn = event.target.closest('[data-copy-url]');
+    if (copyUrlBtn) {
+      const pageIndex = Number(shareDialog.getAttribute('data-page-index'));
+      const shareUrl = getPoemShareUrl(pageIndex);
+      copyTextToClipboard(shareUrl).then((copied) => {
+        setShareStatus(copied ? 'Copied URL.' : 'Could not copy URL.', !copied);
+        clearShareStatusSoon();
+      });
+      return;
+    }
+
+    const nativeShareBtn = event.target.closest('[data-native-share]');
+    if (nativeShareBtn && typeof navigator.share === 'function') {
+      const pageIndex = Number(shareDialog.getAttribute('data-page-index'));
+      const poem = poems[pageIndex];
+      const shareData = {
+        title: poem.title,
+        text: poem.titleTranslation || poem.title,
+        url: getPoemShareUrl(pageIndex)
+      };
+
+      navigator.share(shareData)
+        .then(() => {
+          setShareStatus('Shared successfully.');
+          clearShareStatusSoon();
+        })
+        .catch((error) => {
+          if (error && error.name === 'AbortError') {
+            return;
+          }
+          setShareStatus('Could not open the share sheet.', true);
+          clearShareStatusSoon();
+        });
+    }
+  });
+
+  shareDialog.addEventListener('keydown', handleShareDialogKeydown);
 }
 
 /**
@@ -1444,6 +1742,7 @@ function detectSafari() {
 function init() {
   detectSafari();
   loadTranslationPreference();
+  setupShareDialog();
 
   // Validate DOM elements
   notebook = document.getElementById('notebook');
@@ -1481,6 +1780,19 @@ function init() {
   };
   eventHandlers.hashChange = hashChangeHandler;
   window.addEventListener('hashchange', hashChangeHandler);
+
+  if (eventHandlers.shareTrigger) {
+    document.removeEventListener('click', eventHandlers.shareTrigger);
+  }
+  const shareTriggerHandler = (event) => {
+    const button = event.target.closest('.share-poem');
+    if (!button) return;
+    const pageIndex = Number(button.getAttribute('data-page-index'));
+    const safeIndex = Number.isInteger(pageIndex) ? pageIndex : currentPage;
+    openShareDialog(safeIndex, button);
+  };
+  eventHandlers.shareTrigger = shareTriggerHandler;
+  document.addEventListener('click', shareTriggerHandler);
 
   // Navigation buttons
   prevBtn.addEventListener('click', () => changePage(-1));
