@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-02-26T06:27:33.653111+00:00",
+  "generatedAt": "2026-02-26T07:01:39.548603+00:00",
   "files": [
     "01-dapu-athamu.yaml",
     "02-vande-maataram.yaml",
@@ -15,7 +15,8 @@
     "11-likhaan-ta-maan-chhaa-likhaan.yaml",
     "12-aseen-ahiyuun-sindhii.yaml",
     "13-shantii-kii-shubh-kaamnaa.yaml",
-    "14-muun-kayo-aa-pyaar.yaml"
+    "14-muun-kayo-aa-pyaar.yaml",
+    "15-padmashri-dr-motilal-jotwani-hika-aziim-shakhsiiyat.yaml"
   ],
   "poems": [
     {
@@ -140,6 +141,21 @@
       "original": "मूं कयो आ प्यारु, जेॾो तोखे,\nन करे कोई सघंदो, एॾो तोखे।\n\nपलक में कया पेश, तारा फ़लक जा,\nभाण्यां थो मां, ॾिसु हेॾो तोखे।\n\nमूं कयो आ प्यारु, जेॾो तोखे,\nन करे कोई सघंदो, एॾो तोखे।\n\nतोखे ॾिसां, न ॾिसां, ॿियो कुझु बि,\nप्यार सां प्यो मां पसां, केॾो तोखे।\n\nमूं कयो आ प्यारु, जेॾो तोखे,\nन करे कोई सघंदो, एॾो तोखे।\n\nआख़िरी न उन जी, मेहफ़ूज़ रहंदी,\nमजाल आ, को ॾिसे, तेॾो तोखे।\n\nमूं कयो आ प्यारु, जेॾो तोखे,\nन करे कोई सघंदो, एॾो तोखे।\n",
       "translation": "I have loved you—so deeply—\nas no one else could ever love you.\n\nIn a blink, I placed before you the stars of the sky;\nI feel I've seen you — that vividly, that completely.\n\nI have loved you—so deeply—\nas no one else could ever love you.\n\nWhether I look at you or not, nothing else remains;\nwith love I keep gazing at you, so much—so intensely.\n\nI have loved you—so deeply—\nas no one else could ever love you.\n\nIn the end, even they won't stay protected—\nlet them try, if anyone dares to look at you that way.\n\nI have loved you—so deeply—\nas no one else could ever love you.\n",
       "phonetic": "Muun kayo aa pyaaru, jed'o tokhe,\nna kare koii saghando, ed'o tokhe.\n\nPalak mein kayaa pesh, taaraa falak jaa,\nbhaanyaan tho maan, d'isu hed'o tokhe.\n\nMuun kayo aa pyaaru, jed'o tokhe,\nna kare koii saghando, ed'o tokhe.\n\nTokhe d'isaan, na d'isaan, b'iyo kuchh bi,\npyaar saan pyo maan pasaan, ked'o tokhe.\n\nMuun kayo aa pyaaru, jed'o tokhe,\nna kare koii saghando, ed'o tokhe.\n\nAkhirii na una ji, mehfooz rahandii,\nmajaal aa, ko d'ise, ted'o tokhe.\n\nMuun kayo aa pyaaru, jed'o tokhe,\nna kare koii saghando, ed'o tokhe.\n"
+    },
+    {
+      "title": "पद्मश्री डॉ. मोतीलाल जोतवाणी - हिक अज़ीम शख्सियत",
+      "titleTranslation": "Padma Shri Dr. Motilal Jotwani - A Great Personality",
+      "titlePhonetic": "Padmashri Dr. Motilal Jotwani - Hika Aziim Shakhsiiyat",
+      "hoverText": [
+        "Dr. Motilal Jotwani is the late brother of Dr. Nandlal Jotwani. His contribution to the Sindhi language and Sindhiyat is immense.",
+        "Another version of this poem had the line: 'A Shining, Sparkling Star in the Firmament of Sindhi Literature; a Precious Jewel in the Necklace of Humanity'.",
+        "Sindhiyat refers to the essence of being Sindhi, encompassing the distinct culture, language, traditions, and lifestyle of the Sindhi people.",
+        "Kohinoor is a Persian phrase meaning 'Mountain of Light'. It refers to one of the world's largest cut diamonds (105.6 carats). The name symbolizes exceptional brilliance and immense value.",
+        "Dr. Motilal Jotwani is the late brother of Dr. Nandlal Jotwani. His contribution to the Sindhi language and Sindhiyat is immense."
+      ],
+      "original": "हू त सिंधियुनि जो शानु विद्वान बेमिसाल आहे\nहुन कयो सिंधी ऐं सिंधियत खे मालामाल आहे,\nअहिड़ो अज़ीम अदीबु, आलिम ऐं इंसान थो विरले मिले\nहू असांजी कौम जो हिक कोहिनूर {मोती लाल} आहे।\n",
+      "translation": "He is the {pride of the Sindhis}—an unparalleled scholar.\nHe enriched the Sindhi language and {Sindhiyat}.\nSuch a great writer, learned scholar, and true human being is rarely found—\nhe is the {Kohinoor} of our community: {Motilal}.\n",
+      "phonetic": "Huu ta Sindhiyun jo shaanu vidwaan bemisaal aahe\nhuna kayo Sindhi ain sindhiyat khe maalaamaal aahe,\naihiro aziim adiibu, aalim ain insaan tho virle mile\nhuu asaanji kaum jo hiku kohinoor Moti Lal aahe.\n"
     }
   ]
 }
