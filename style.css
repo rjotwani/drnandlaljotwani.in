@@ -830,12 +830,14 @@ body>.toggle-translation {
   background: var(--paper);
   color: var(--accent-dark);
   border-radius: var(--border-radius-full);
-  padding: 0.35rem 0.9rem;
-  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   cursor: pointer;
-  font-family: inherit;
   transition: transform 150ms ease, box-shadow 150ms ease;
-  min-height: 44px;
 }
 
 .share-poem:hover {
@@ -962,19 +964,24 @@ body.share-dialog-open {
 }
 
 .native-share-btn {
-  margin-top: var(--space-sm);
-  width: 100%;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
 }
 
-.share-status {
-  min-height: 1.25rem;
-  margin: var(--space-sm) 0 0;
-  font-size: 0.85rem;
-  color: var(--text-tertiary);
-}
-
-.share-status.error {
-  color: #8a2d2d;
+.share-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  pointer-events: none;
 }
 
 /* ============================================

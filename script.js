@@ -14,11 +14,16 @@ const MOBILE_LANDSCAPE_WIDTH_THRESHOLD = 1000;
 const MOBILE_LANDSCAPE_HEIGHT_THRESHOLD = 500;
 const MOBILE_SCROLL_OFFSET = 20;
 const SCROLL_INDICATOR_OFFSET = 60;
-const SHARE_COPY_FEEDBACK_DELAY = 1800;
 const POEMS_INDEX_PATH = 'poems/index.json';
 const POEMS_BUNDLE_PATH = 'poems/poems-bundle.json';
 const LOCAL_DEV_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
 const TRANSLATION_PREFERENCE_KEY = 'globalTranslationVisible';
+const SHARE_ICON_SVG = `
+  <svg class="share-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M3 16.5V18.75C3 19.9926 4.00736 21 5.25 21H18.75C19.9926 21 21 19.9926 21 18.75V16.5" />
+    <path d="M7.5 7.5L12 3M12 3L16.5 7.5M12 3V16.5" />
+  </svg>
+`;
 
 // DOM elements - validated at initialization
 let notebook;
@@ -41,7 +46,6 @@ let cachedWindowHeight = null;
 let cachedTouchSupport = null;
 let shareDialog = null;
 let shareDialogLastFocusedElement = null;
-let shareStatusTimeout = null;
 
 // Event handlers for cleanup
 const eventHandlers = {
@@ -546,8 +550,9 @@ function renderPoems() {
     const shareBtn = document.createElement('button');
     shareBtn.className = 'share-poem';
     shareBtn.type = 'button';
-    shareBtn.textContent = 'Share';
+    shareBtn.innerHTML = SHARE_ICON_SVG;
     shareBtn.setAttribute('aria-label', `Share poem ${index + 1}`);
+    shareBtn.title = 'Share poem';
     shareBtn.setAttribute('data-page-index', String(index));
     footerActions.appendChild(shareBtn);
 
@@ -670,32 +675,6 @@ async function copyTextToClipboard(text) {
 }
 
 /**
- * Updates the share modal status message and optional error styling.
- * @param {string} message
- * @param {boolean} [isError]
- */
-function setShareStatus(message, isError = false) {
-  if (!shareDialog) return;
-  const status = shareDialog.querySelector('[data-share-status]');
-  if (!status) return;
-
-  status.textContent = message || '';
-  status.classList.toggle('error', Boolean(isError));
-}
-
-/**
- * Clears the share status after a brief delay.
- */
-function clearShareStatusSoon() {
-  if (shareStatusTimeout) {
-    clearTimeout(shareStatusTimeout);
-  }
-  shareStatusTimeout = setTimeout(() => {
-    setShareStatus('');
-  }, SHARE_COPY_FEEDBACK_DELAY);
-}
-
-/**
  * Closes the share dialog and restores focus to the opener button.
  */
 function closeShareDialog() {
@@ -703,12 +682,6 @@ function closeShareDialog() {
 
   shareDialog.setAttribute('hidden', '');
   document.body.classList.remove('share-dialog-open');
-  setShareStatus('');
-
-  if (shareStatusTimeout) {
-    clearTimeout(shareStatusTimeout);
-    shareStatusTimeout = null;
-  }
 
   if (shareDialogLastFocusedElement instanceof HTMLElement) {
     shareDialogLastFocusedElement.focus();
@@ -782,8 +755,6 @@ function openShareDialog(pageIndex = currentPage, triggerElement = null) {
   const supportsNativeShare = typeof navigator.share === 'function';
   nativeShareBtn.hidden = !supportsNativeShare;
 
-  setShareStatus('Choose what to copy or share.');
-
   shareDialog.removeAttribute('hidden');
   document.body.classList.add('share-dialog-open');
   firstActionButton.focus();
@@ -806,16 +777,23 @@ function setupShareDialog() {
       </div>
       <div class="share-dialog-actions">
         <button type="button" data-copy-type="original">Copy Sindhi</button>
-        <button type="button" data-copy-type="phonetic">Copy phonetic</button>
+        <button type="button" data-copy-type="phonetic">Copy Phonetic</button>
         <button type="button" data-copy-type="translation">Copy English</button>
       </div>
       <label class="share-url-label" for="shareUrlInput">Share URL</label>
       <div class="share-url-row">
         <input id="shareUrlInput" data-share-url type="text" readonly />
         <button type="button" data-copy-url>Copy URL</button>
+        <button
+          class="native-share-btn"
+          type="button"
+          data-native-share
+          aria-label="Open share sheet"
+          title="Open share sheet"
+        >
+          ${SHARE_ICON_SVG}
+        </button>
       </div>
-      <button class="native-share-btn" type="button" data-native-share>Open share sheet</button>
-      <p class="share-status" data-share-status aria-live="polite"></p>
     </div>
   `;
   document.body.appendChild(shareDialog);
@@ -839,16 +817,11 @@ function setupShareDialog() {
       const poem = poems[pageIndex];
       const copyValue = getShareTextByType(poem, type);
       if (!copyValue.trim()) {
-        setShareStatus(`No ${type} text is available for this poem.`, true);
-        clearShareStatusSoon();
         return;
       }
 
       const payload = `${poem.title}\n\n${copyValue.trim()}`;
-      copyTextToClipboard(payload).then((copied) => {
-        setShareStatus(copied ? `Copied ${type} text.` : `Could not copy ${type} text.`, !copied);
-        clearShareStatusSoon();
-      });
+      copyTextToClipboard(payload);
       return;
     }
 
@@ -856,10 +829,7 @@ function setupShareDialog() {
     if (copyUrlBtn) {
       const pageIndex = Number(shareDialog.getAttribute('data-page-index'));
       const shareUrl = getPoemShareUrl(pageIndex);
-      copyTextToClipboard(shareUrl).then((copied) => {
-        setShareStatus(copied ? 'Copied URL.' : 'Could not copy URL.', !copied);
-        clearShareStatusSoon();
-      });
+      copyTextToClipboard(shareUrl);
       return;
     }
 
@@ -875,15 +845,12 @@ function setupShareDialog() {
 
       navigator.share(shareData)
         .then(() => {
-          setShareStatus('Shared successfully.');
-          clearShareStatusSoon();
+          // Native share sheet handled the action.
         })
         .catch((error) => {
           if (error && error.name === 'AbortError') {
             return;
           }
-          setShareStatus('Could not open the share sheet.', true);
-          clearShareStatusSoon();
         });
     }
   });
