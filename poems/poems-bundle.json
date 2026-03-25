@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-02-26T07:01:39.548603+00:00",
+  "generatedAt": "2026-03-25T06:43:27.558986+00:00",
   "files": [
     "01-dapu-athamu.yaml",
     "02-vande-maataram.yaml",
@@ -16,7 +16,8 @@
     "12-aseen-ahiyuun-sindhii.yaml",
     "13-shantii-kii-shubh-kaamnaa.yaml",
     "14-muun-kayo-aa-pyaar.yaml",
-    "15-padmashri-dr-motilal-jotwani-hika-aziim-shakhsiiyat.yaml"
+    "15-padmashri-dr-motilal-jotwani-hika-aziim-shakhsiiyat.yaml",
+    "16-zakhm-to-jeke-dinaa.yaml"
   ],
   "poems": [
     {
@@ -156,6 +157,21 @@
       "original": "हू त सिंधियुनि जो शानु विद्वान बेमिसाल आहे\nहुन कयो सिंधी ऐं सिंधियत खे मालामाल आहे,\nअहिड़ो अज़ीम अदीबु, आलिम ऐं इंसान थो विरले मिले\nहू असांजी कौम जो हिक कोहिनूर {मोती लाल} आहे।\n",
       "translation": "He is the {pride of the Sindhis}—an unparalleled scholar.\nHe enriched the Sindhi language and {Sindhiyat}.\nSuch a great writer, learned scholar, and true human being is rarely found—\nhe is the {Kohinoor} of our community: {Motilal}.\n",
       "phonetic": "Huu ta Sindhiyun jo shaanu vidwaan bemisaal aahe\nhuna kayo Sindhi ain sindhiyat khe maalaamaal aahe,\naihiro aziim adiibu, aalim ain insaan tho virle mile\nhuu asaanji kaum jo hiku kohinoor Moti Lal aahe.\n"
+    },
+    {
+      "title": "ज़ख्म तो जेके डिणा",
+      "titleTranslation": "The Wounds You Gave",
+      "titlePhonetic": "Zakhm To Jeke D'inaa",
+      "hoverText": [
+        "Dr. Motilal Jotwani is the late brother of Dr. Nandlal Jotwani. His contribution to the Sindhi language and Sindhiyat is immense.",
+        "Another version of this poem had the line: 'A Shining, Sparkling Star in the Firmament of Sindhi Literature; a Precious Jewel in the Necklace of Humanity'.",
+        "Sindhiyat refers to the essence of being Sindhi, encompassing the distinct culture, language, traditions, and lifestyle of the Sindhi people.",
+        "Kohinoor is a Persian phrase meaning 'Mountain of Light'. It refers to one of the world's largest cut diamonds (105.6 carats). The name symbolizes exceptional brilliance and immense value.",
+        "Dr. Motilal Jotwani is the late brother of Dr. Nandlal Jotwani. His contribution to the Sindhi language and Sindhiyat is immense."
+      ],
+      "original": "ज़ख्म तो जेके डिणा\nसो मां महफूज़ रखिया,\nतूंहिंजी हर “शै” खे मां\nसौगात ई समुझी आ!\nज़ख्म तो जेके डिणा—\n\nचांदनी आई मां घर,\nसितारनि जी साडी पाई,\nमां त कुदरत जी इहा\nकरामात ई समुझी आ!\nज़ख्म तो जेके डिणा—\n\nमुंहिंजे परवाज़ जा पर\nपियो थो कटीं, कटंदो रहु,\nमां त तूंहिंजे तराशण खे\nइमदाद ई समुझी आ!\nज़ख्म तो जेके डिणा—\n\nथी करे गर्भ में कत्लु\nकंहिं न्याणीअ जो, का माउ,\nडिसी डा[?]टारू बि रोणो, त\nबरसात ई समुझी आ!\nज़ख्म तो जेके डिणा—\n\nधरती छो थी पे धुडे,\nविजु छो थी पे कुडे,\nतो न का गाल्हि, न का\nबात ई समुझी आ!\nज़ख्म तो जेके डिणा—\n\nबारू भुखियो पो सुम्हे,\nआँचल में खीर बि कोन्हे,\nअहिड़ी फ़िज़ा खे फ़कति, तो\nरात ई समुझी आ!\nज़ख्म तो जेके डिणा—\n\nज़िंदगी मोलु थो करीं\nजा अनमोलु नेमत आ,\nतो त ज़िंदगी बि का\nखुराफात ई समुझी आ!\nज़ख्म तो जेके डिणा—\n\nमां उनहिं मां न आहियां जे\nकिया कंहिर में तूंहिंजे,\nतो मूंखे बि छा पंहिंजी\nऔकात ई समुझी आ!\nज़ख्म तो जेके डिणा—\n",
+      "translation": "The wounds you gave—\nI preserved them carefully;\nI took every single thing of yours\nas a gift, a keepsake.\nThe wounds you gave—\n\nWhen moonlight entered my home,\nwearing a sari of stars,\nI understood it\nas a miracle of nature.\nThe wounds you gave—\n\nIf my wings are being clipped—\nkeep cutting, if you must;\nI'll still take your shaping of me\nas help, as support.\nThe wounds you gave—\n\nWhen an innocent child is killed in the womb—\nwhen a mother has to watch that—\neven if the heavens weep,\npeople call it “just rain.”\nThe wounds you gave—\n\nWhen the earth is shaken,\nwhen lightning strikes,\nyou call it nothing—\nno matter, no meaning.\nThe wounds you gave—\n\nWhen a hungry child falls asleep,\nwith no milk even in the mother's shawl,\nyou treat such a climate—\nas if it's merely “night.”\nThe wounds you gave—\n\nThis life is priceless—\nan unpriced blessing—\nyet you dismiss life itself\nas mere nonsense.\nThe wounds you gave—\n\nI'm not one of those\nwho wronged you in some cruel way—\nthen why do you still reduce me\nto “my place,” my “status”?\nThe wounds you gave—\n",
+      "phonetic": "Zakhm to jeke d'inaa\nso maan mahfuuz rakhiyaa,\ntuuhinjii har “shai” khe maan\nsaugaat ii samujhii aa!\nZakhm to jeke d'inaa—\n\nChaandanii aaii maan ghar,\nsitaarani jii saad'ii paaii,\nmaan ta kudarat jii ihaa\nkaraamaat ii samujhii aa!\nZakhm to jeke d'inaa—\n\nMunhinje parvaaz jaa par\npiyo tho katiin, katando rahu,\nmaan ta tuuhinje taraashan khe\nimdaad ii samujhii aa!\nZakhm to jeke d'inaa—\n\nThii kare garbh mein qatlu\nkanhin niyaanii-a jo, kaa maau,\ndisii d'aa[?]taaruu bi roṇo, ta\nbarsaat ii samujhii aa!\nZakhm to jeke d'inaa—\n\nDhartii chho thii pe dhud'e,\nviju chho thii pe kud'e,\nto na kaa g'aalhi, na kaa\nbaat ii samujhii aa!\nZakhm to jeke d'inaa—\n\nBaaruu bhukhiyo po sumhe,\naanchal mein khiir bi konhe,\nahid'ii fizaa khe faqati, to\nraat ii samujhii aa!\nZakhm to jeke d'inaa—\n\nZindagii molu tho kariin\njaa anmolu nemat aa,\nto ta zindagii bi kaa\nkhuraafaat ii samujhii aa!\nZakhm to jeke d'inaa—\n\nMaan unhin maan na aahiyaan je\nkiyaa kanhir mein tuuhinje,\nto muunkhe bi chhaa panhinjii\nauqaat ii samujhii aa!\nZakhm to jeke d'inaa—\n"
     }
   ]
 }
