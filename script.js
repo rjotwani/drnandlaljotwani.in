@@ -878,12 +878,13 @@ function setupShareDialog() {
       const pageIndex = Number(shareDialog.getAttribute('data-page-index'));
       const poem = poems[pageIndex];
       const shareTextLines = [
+        "Here's a poem I liked by Nandlal Jotwani:",
         poem.title,
         poem.titlePhonetic,
         poem.titleTranslation,
       ].filter((line) => typeof line === 'string' && line.trim() !== '');
       const shareData = {
-        title: "Here's a poem I liked by Nandlal Jotwani:",
+        title: "Dr. Nandlal Jotwani | Sindhi Poetry",
         text: shareTextLines.join('\n'),
         url: getPoemShareUrl(pageIndex)
       };
