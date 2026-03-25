@@ -878,7 +878,7 @@ function setupShareDialog() {
       const pageIndex = Number(shareDialog.getAttribute('data-page-index'));
       const poem = poems[pageIndex];
       const shareTextLines = [
-        "Here's a poem I liked by Nandlal Jotwani:",
+        "Here's a poem I liked by Dr. Nandlal Jotwani:",
         poem.title,
         poem.titlePhonetic,
         poem.titleTranslation,
