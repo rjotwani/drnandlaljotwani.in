@@ -630,11 +630,50 @@ function getPoemShareUrl(pageIndex = currentPage) {
 /**
  * Gets a copyable poem text for the requested language variant.
  * @param {Object} poem
- * @param {'original'|'phonetic'|'translation'} type
+ * @param {'original'|'phonetic'|'translation'|'all'} type
  * @returns {string}
  */
+function stripMarkerBraces(text) {
+  if (typeof text !== 'string') return '';
+  return normalizeLineEndings(text).replace(/\{([^}]+)\}/g, '$1');
+}
+
+/**
+ * Builds line-wise share text with original + phonetic + English.
+ * @param {Object} poem
+ * @returns {string}
+ */
+function getShareAllLinesText(poem) {
+  if (!poem || typeof poem !== 'object') return '';
+
+  const originalLines = splitIntoLines(stripMarkerBraces(poem.original || ''));
+  const phoneticLines = splitIntoLines(stripMarkerBraces(poem.phonetic || ''));
+  const translationLines = splitIntoLines(stripMarkerBraces(poem.translation || ''));
+  const maxLines = Math.max(originalLines.length, phoneticLines.length, translationLines.length);
+  const blocks = [];
+
+  for (let i = 0; i < maxLines; i++) {
+    const originalLine = (originalLines[i] || '').trim();
+    const phoneticLine = (phoneticLines[i] || '').trim();
+    const translationLine = (translationLines[i] || '').trim();
+
+    if (!originalLine && !phoneticLine && !translationLine) {
+      continue;
+    }
+
+    blocks.push([
+      `${originalLine || '-'}`,
+      `${phoneticLine || '-'}`,
+      `${translationLine || '-'}`
+    ].join('\n'));
+  }
+
+  return blocks.join('\n\n');
+}
+
 function getShareTextByType(poem, type) {
   if (!poem || typeof poem !== 'object') return '';
+  if (type === 'all') return getShareAllLinesText(poem);
   if (type === 'original') return poem.original || '';
   if (type === 'phonetic') return poem.phonetic || '';
   return poem.translation || '';
@@ -779,6 +818,7 @@ function setupShareDialog() {
         <button type="button" data-copy-type="original">Copy Sindhi</button>
         <button type="button" data-copy-type="phonetic">Copy Phonetic</button>
         <button type="button" data-copy-type="translation">Copy English</button>
+        <button type="button" data-copy-type="all">Copy All</button>
       </div>
       <label class="share-url-label" for="shareUrlInput">Share URL</label>
       <div class="share-url-row">
