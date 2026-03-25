@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-03-25T07:04:02.279805+00:00",
+  "generatedAt": "2026-03-25T07:11:47.682278+00:00",
   "files": [
     "01-dapu-athamu.yaml",
     "02-vande-maataram.yaml",
@@ -19,7 +19,8 @@
     "15-padmashri-dr-motilal-jotwani-hika-aziim-shakhsiiyat.yaml",
     "16-zakhm-to-jeke-dinaa.yaml",
     "17-sindhi-mushaaire-jo-aagazu.yaml",
-    "18-holi.yaml"
+    "18-holi.yaml",
+    "19-ba.yaml"
   ],
   "poems": [
     {
@@ -183,6 +184,14 @@
       "original": "अचु मिठरा तूं भाकुर पाई, अजु त आहे होली\nजुरियल रहूं, न जुदा थियूं, महफ़ूज़ु मिठरी टोली\n\nवणंदर गीहर, पकवान स्वादी, सनु आहे हमजोली\nरंगा में रतलु, प्रेम में पिसियलु, जिसिमु ऐं चोली\n\nसुहिणा सिंधी, सुहिणी सिंधियत, सुहिणी मुंहिंजी ॿोली\nसुहिणी आ ज़ुबान जैन्हिं में माउ ॾिनी मूंखे लोली\n\nख़ुशी-अ जो आ ॾिनु आ, प्यार संदो पैगामु आ होली\nअचो त असीं ऐलानु कयूं त कायम रखंदासीं ॿोली\n",
       "translation": "Come, my dear friend—put on your festive colors: today is Holi.\nLet's stay joined, not drift apart—safe in our sweet little circle.\n\nRich food from the hearth, delicious dishes—today is togetherness;\nsoaked in color, dissolved in love—body and scarf, all dyed as one.\n\nBeautiful are the Sindhis, beautiful is Sindhiyat, beautiful is my speech—\nbeautiful is the tongue in which my mother sang me lullabies.\n\nIt's a day of joy, Holi is love's message—\ncome, let us declare: we will keep our language alive.\n",
       "phonetic": "Achu mithraa tuun bhaakur paai, aj'u ta aahe Holi\njuriyal rahun, na judaa thiyun, mahfuzu mithri toli\n\nVan'ander geeher, pakwaan swaadi, san'u aahe humjoli\nranga mein ratalu, prem mein pisiyalu, jisim ain choli\n\nSuhin'a Sindhi, suhin'i Sindhiyat, suhin'i munhinji b'oli\nsuhin'i aa zubaan jainhin mein maau d'ini muunkhe loli\n\nKhushi-a jo aa d'in'u aa, pyaar sando paigaamu aa Holi\nacho ta aseen ailaan kayun ta kaaim rakhandasin B'oli\n"
+    },
+    {
+      "title": "B.A.",
+      "titleTranslation": "B.A.",
+      "titlePhonetic": "B.A.",
+      "original": "अख़िरियुनि जी जोत किताबनि ते …\nपांउ गिटमिट ते क़ुर्बानु कयाईँ\nकेॾो कष्टु कयाईँ किताबनि ते,\nकेॾो नष्टु जिसिमु ऐं जान कयाईँ।\n\nअदी, ॿण पए मुई अंग्रेज़ी …\nमुरसम खे थ्या के साल परहे,\nजॾैंह जोभनु वयमु किनार करे\nमसा मुरसा आंदा ॿ हेरफ़ा B.A.\n",
+      "translation": "The last spark of my life was spent on books…\nI gave myself up completely to them.\nWhat hardship I suffered for those books,\nwhat ruin I brought upon body and soul.\n\nBrother, only then did I finally manage English…\nI studied for years and years,\nand by the time my youth had slipped away,\nonly then did I return with the mere letters: B.A.\n",
+      "phonetic": "Akhiriyun ji jot kitaabani te …\npan'u gitmit te qurbaanu kayaaeen\nked'o kashtu kayaaeen kitaaban te,\nked'o nashtu jismu ain jaan kayaaeen.\n\nAdi, b'an paye muii angrezii …\nmursam khe thyaa ke saal parhe,\njad'ainh jobhanu vayamu kinaar kare\nmasa mursa aanda b'a herfa B.A.\n"
     }
   ]
 }
